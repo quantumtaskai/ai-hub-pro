@@ -318,7 +318,28 @@ export default function HomePage() {
                     +
                   </span>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div 
+                  onClick={() => setShowProfileModal(true)}
+                  style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: '12px',
+                    cursor: 'pointer',
+                    padding: '8px 16px',
+                    borderRadius: '12px',
+                    transition: 'all 0.2s ease',
+                    background: 'rgba(255, 255, 255, 0.1)',
+                    border: '1px solid rgba(255, 255, 255, 0.2)'
+                  }}
+                  onMouseEnter={(e) => {
+                    (e.target as HTMLElement).style.background = 'rgba(255, 255, 255, 0.2)'
+                    ;(e.target as HTMLElement).style.transform = 'translateY(-1px)'
+                  }}
+                  onMouseLeave={(e) => {
+                    (e.target as HTMLElement).style.background = 'rgba(255, 255, 255, 0.1)'
+                    ;(e.target as HTMLElement).style.transform = 'translateY(0)'
+                  }}
+                >
                   <div style={{
                     width: '44px',
                     height: '44px',
@@ -333,37 +354,13 @@ export default function HomePage() {
                     {user.name.charAt(0).toUpperCase()}
                   </div>
                   <span style={{ color: '#1f2937', fontWeight: '600' }}>{user.name}</span>
-                  <button
-                    onClick={() => setShowProfileModal(true)}
-                    style={{
-                      background: 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)',
-                      color: 'white',
-                      border: 'none',
-                      padding: '8px 16px',
-                      borderRadius: '8px',
-                      fontSize: '14px',
-                      cursor: 'pointer',
-                      marginLeft: '8px',
-                      fontWeight: 500
-                    }}
-                  >
-                    Profile
-                  </button>
-                  <button
-                    onClick={handleLogout}
-                    style={{
-                      background: '#ef4444',
-                      color: 'white',
-                      border: 'none',
-                      padding: '8px 16px',
-                      borderRadius: '8px',
-                      fontSize: '14px',
-                      cursor: 'pointer',
-                      marginLeft: '8px'
-                    }}
-                  >
-                    Logout
-                  </button>
+                  <span style={{ 
+                    color: '#6b7280', 
+                    fontSize: '14px',
+                    marginLeft: '4px'
+                  }}>
+                    ↓
+                  </span>
                 </div>
               </>
             ) : (

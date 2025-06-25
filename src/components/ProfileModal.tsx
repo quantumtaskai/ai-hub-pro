@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { useUserStore } from '../store/userStore';
+import { toast } from 'react-hot-toast';
 
 interface ProfileModalProps {
   isOpen: boolean;
@@ -9,7 +10,7 @@ interface ProfileModalProps {
 }
 
 export default function ProfileModal({ isOpen, onClose, userId }: ProfileModalProps) {
-  const { refreshUser } = useUserStore();
+  const { refreshUser, signOut } = useUserStore();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
@@ -150,6 +151,16 @@ export default function ProfileModal({ isOpen, onClose, userId }: ProfileModalPr
     }
   };
 
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      onClose(); // Close modal after logout
+      toast.success('Logged out successfully');
+    } catch (error) {
+      toast.error('Failed to logout');
+    }
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -269,38 +280,60 @@ export default function ProfileModal({ isOpen, onClose, userId }: ProfileModalPr
         )}
         <div style={{
           display: 'flex',
-          justifyContent: 'flex-end',
+          justifyContent: 'space-between',
+          alignItems: 'center',
           gap: '8px'
         }}>
           <button
             style={{
               padding: '8px 16px',
               borderRadius: '6px',
-              background: '#f3f4f6',
-              border: 'none',
-              cursor: 'pointer',
-              fontSize: '14px'
-            }}
-            onClick={onClose}
-            disabled={loading}
-          >
-            Cancel
-          </button>
-          <button
-            style={{
-              padding: '8px 16px',
-              borderRadius: '6px',
-              background: '#3b82f6',
+              background: '#ef4444',
               color: 'white',
               border: 'none',
               cursor: 'pointer',
-              fontSize: '14px'
+              fontSize: '14px',
+              transition: 'background 0.2s ease'
             }}
-            onClick={handleSave}
+            onClick={handleLogout}
             disabled={loading}
+            onMouseEnter={(e) => (e.target as HTMLElement).style.background = '#dc2626'}
+            onMouseLeave={(e) => (e.target as HTMLElement).style.background = '#ef4444'}
           >
-            {loading ? 'Saving...' : 'Save'}
+            🚪 Logout
           </button>
+          
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <button
+              style={{
+                padding: '8px 16px',
+                borderRadius: '6px',
+                background: '#f3f4f6',
+                border: 'none',
+                cursor: 'pointer',
+                fontSize: '14px'
+              }}
+              onClick={onClose}
+              disabled={loading}
+            >
+              Cancel
+            </button>
+            <button
+              style={{
+                padding: '8px 16px',
+                borderRadius: '6px',
+                background: '#3b82f6',
+                color: 'white',
+                border: 'none',
+                cursor: 'pointer',
+                fontSize: '14px'
+              }}
+              onClick={handleSave}
+              disabled={loading}
+            >
+              {loading ? 'Saving...' : 'Save'}
+            </button>
+          </div>
         </div>
       </div>
     </div>
