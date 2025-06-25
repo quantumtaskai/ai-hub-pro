@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { supabase } from '../lib/supabase';
 import { useUserStore } from '../store/userStore';
 import { toast } from 'react-hot-toast';
@@ -7,15 +7,44 @@ interface ProfileModalProps {
   isOpen: boolean;
   onClose: () => void;
   userId: string;
+  position?: { top: number; right: number };
 }
 
-export default function ProfileModal({ isOpen, onClose, userId }: ProfileModalProps) {
+export default function ProfileModal({ isOpen, onClose, userId, position }: ProfileModalProps) {
   const { refreshUser, signOut } = useUserStore();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const modalRef = useRef<HTMLDivElement>(null);
+
+  // Click outside detection for dropdown mode
+  useEffect(() => {
+    const isDropdown = position !== undefined;
+    
+    if (isDropdown && isOpen) {
+      const handleClickOutside = (event: MouseEvent) => {
+        if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
+          onClose();
+        }
+      };
+
+      const handleEscapeKey = (event: KeyboardEvent) => {
+        if (event.key === 'Escape') {
+          onClose();
+        }
+      };
+
+      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('keydown', handleEscapeKey);
+
+      return () => {
+        document.removeEventListener('mousedown', handleClickOutside);
+        document.removeEventListener('keydown', handleEscapeKey);
+      };
+    }
+  }, [isOpen, onClose, position]);
 
   useEffect(() => {
     if (isOpen && userId) {
@@ -163,28 +192,47 @@ export default function ProfileModal({ isOpen, onClose, userId }: ProfileModalPr
 
   if (!isOpen) return null;
 
+  // Use dropdown positioning if provided, otherwise center modal
+  const isDropdown = position !== undefined;
+
   return (
-    <div style={{
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      zIndex: 1000,
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      background: 'rgba(0, 0, 0, 0.5)'
-    }}>
-      <div style={{
-        background: 'white',
-        borderRadius: '12px',
-        boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
-        padding: '24px',
-        width: '100%',
-        maxWidth: '400px',
-        position: 'relative'
-      }}>
+    <React.Fragment>
+      {/* Backdrop only for non-dropdown mode */}
+      {!isDropdown && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          zIndex: 999,
+          background: 'rgba(0, 0, 0, 0.5)'
+        }} onClick={onClose}></div>
+      )}
+      
+      <div 
+        ref={modalRef}
+        style={{
+          position: 'fixed',
+          ...(isDropdown ? {
+            top: position!.top,
+            right: position!.right,
+            zIndex: 1000
+          } : {
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            zIndex: 1000
+          }),
+          background: isDropdown ? 'rgba(255, 255, 255, 0.95)' : 'white',
+          backdropFilter: isDropdown ? 'blur(20px)' : 'none',
+          borderRadius: '12px',
+          boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
+          border: isDropdown ? '1px solid rgba(255, 255, 255, 0.3)' : 'none',
+          padding: '24px',
+          width: isDropdown ? '320px' : '100%',
+          maxWidth: isDropdown ? '320px' : '400px'
+        }}>
         <button
           style={{
             position: 'absolute',
@@ -336,6 +384,6 @@ export default function ProfileModal({ isOpen, onClose, userId }: ProfileModalPr
           </div>
         </div>
       </div>
-    </div>
+    </React.Fragment>
   );
 } 

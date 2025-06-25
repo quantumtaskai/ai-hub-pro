@@ -127,6 +127,7 @@ export default function HomePage() {
   const [lastResult, setLastResult] = useState('')
   const [isLoading, setIsLoading] = useState(true)
   const [showProfileModal, setShowProfileModal] = useState(false)
+  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, right: 0 })
 
   // Credit packages
   const CREDIT_PACKAGES = [
@@ -253,7 +254,32 @@ export default function HomePage() {
           justifyContent: 'space-between'
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '40px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div 
+              onClick={() => {
+                if (user) {
+                  window.location.href = '/';
+                }
+              }}
+              style={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: '12px',
+                cursor: user ? 'pointer' : 'default',
+                transition: 'transform 0.2s ease',
+                padding: user ? '8px' : '0',
+                borderRadius: '12px'
+              }}
+              onMouseEnter={(e) => {
+                if (user) {
+                  (e.target as HTMLElement).style.transform = 'scale(1.02)';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (user) {
+                  (e.target as HTMLElement).style.transform = 'scale(1)';
+                }
+              }}
+            >
               <img 
                 src="/logo.png" 
                 alt="AgentHub Logo"
@@ -281,12 +307,14 @@ export default function HomePage() {
                 AgentHub
               </div>
             </div>
-            <div style={{ display: 'flex', gap: '32px' }}>
-              <span style={{ color: '#6366f1', fontWeight: '600' }}>Home</span>
-              <span style={{ color: '#9ca3af', fontWeight: '500' }}>Agents</span>
-              <span style={{ color: '#9ca3af', fontWeight: '500' }}>Categories</span>
-              <span style={{ color: '#9ca3af', fontWeight: '500' }}>Pricing</span>
-            </div>
+            {!user && (
+              <div style={{ display: 'flex', gap: '32px' }}>
+                <span style={{ color: '#6366f1', fontWeight: '600' }}>Home</span>
+                <span style={{ color: '#9ca3af', fontWeight: '500' }}>Agents</span>
+                <span style={{ color: '#9ca3af', fontWeight: '500' }}>Categories</span>
+                <span style={{ color: '#9ca3af', fontWeight: '500' }}>Pricing</span>
+              </div>
+            )}
           </div>
           
           <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
@@ -295,31 +323,73 @@ export default function HomePage() {
                 <div 
                   onClick={() => setShowCreditModal(true)}
                   style={{
-                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    background: user.credits <= 100 
+                      ? 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)'
+                      : user.credits <= 500
+                      ? 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)'
+                      : 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
                     color: 'white',
-                    padding: '12px 24px',
-                    borderRadius: '16px',
-                    fontWeight: 'bold',
-                    fontSize: '18px',
-                    boxShadow: '0 8px 25px rgba(102, 126, 234, 0.3)',
+                    padding: '10px 16px',
+                    borderRadius: '12px',
                     cursor: 'pointer',
-                    transition: 'transform 0.2s ease'
+                    transition: 'all 0.3s ease',
+                    boxShadow: user.credits <= 100 
+                      ? '0 4px 15px rgba(239, 68, 68, 0.3)'
+                      : user.credits <= 500
+                      ? '0 4px 15px rgba(245, 158, 11, 0.3)'
+                      : '0 4px 15px rgba(16, 185, 129, 0.3)',
+                    animation: user.credits <= 100 ? 'pulse 2s infinite' : 'none',
+                    minWidth: '140px',
+                    textAlign: 'center'
                   }}
-                  onMouseEnter={(e) => (e.target as HTMLElement).style.transform = 'scale(1.05)'}
-                  onMouseLeave={(e) => (e.target as HTMLElement).style.transform = 'scale(1)'}
+                  onMouseEnter={(e) => {
+                    (e.target as HTMLElement).style.transform = 'translateY(-1px) scale(1.02)'
+                    ;(e.target as HTMLElement).style.boxShadow = user.credits <= 100 
+                      ? '0 6px 20px rgba(239, 68, 68, 0.4)'
+                      : user.credits <= 500
+                      ? '0 6px 20px rgba(245, 158, 11, 0.4)'
+                      : '0 6px 20px rgba(16, 185, 129, 0.4)'
+                  }}
+                  onMouseLeave={(e) => {
+                    (e.target as HTMLElement).style.transform = 'translateY(0) scale(1)'
+                    ;(e.target as HTMLElement).style.boxShadow = user.credits <= 100 
+                      ? '0 4px 15px rgba(239, 68, 68, 0.3)'
+                      : user.credits <= 500
+                      ? '0 4px 15px rgba(245, 158, 11, 0.3)'
+                      : '0 4px 15px rgba(16, 185, 129, 0.3)'
+                  }}
                 >
-                  <span style={{ marginRight: '8px' }}>✨</span>
-                  {user.credits.toLocaleString()} Credits
-                  <span style={{ 
-                    marginLeft: '8px', 
-                    fontSize: '14px', 
-                    opacity: '0.8' 
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px',
+                    fontSize: '14px',
+                    fontWeight: 'bold'
                   }}>
-                    +
-                  </span>
+                    <span>
+                      {user.credits <= 100 ? '⚠️' : user.credits <= 500 ? '⚡' : '✨'}
+                    </span>
+                    <span>{user.credits.toLocaleString()} Credits</span>
+                    <span style={{
+                      fontSize: '22px',
+                      fontWeight: '900',
+                      marginLeft: '4px',
+                      opacity: '0.8'
+                    }}>
+                      +
+                    </span>
+                  </div>
                 </div>
                 <div 
-                  onClick={() => setShowProfileModal(true)}
+                  onClick={(e) => {
+                    const rect = e.currentTarget.getBoundingClientRect();
+                    setDropdownPosition({
+                      top: rect.bottom + 8,
+                      right: window.innerWidth - rect.right
+                    });
+                    setShowProfileModal(true);
+                  }}
                   style={{ 
                     display: 'flex', 
                     alignItems: 'center', 
@@ -328,16 +398,21 @@ export default function HomePage() {
                     padding: '8px 16px',
                     borderRadius: '12px',
                     transition: 'all 0.2s ease',
-                    background: 'rgba(255, 255, 255, 0.1)',
-                    border: '1px solid rgba(255, 255, 255, 0.2)'
+                    background: showProfileModal ? 'rgba(255, 255, 255, 0.2)' : 'rgba(255, 255, 255, 0.1)',
+                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                    position: 'relative'
                   }}
                   onMouseEnter={(e) => {
-                    (e.target as HTMLElement).style.background = 'rgba(255, 255, 255, 0.2)'
-                    ;(e.target as HTMLElement).style.transform = 'translateY(-1px)'
+                    if (!showProfileModal) {
+                      (e.target as HTMLElement).style.background = 'rgba(255, 255, 255, 0.2)'
+                      ;(e.target as HTMLElement).style.transform = 'translateY(-1px)'
+                    }
                   }}
                   onMouseLeave={(e) => {
-                    (e.target as HTMLElement).style.background = 'rgba(255, 255, 255, 0.1)'
-                    ;(e.target as HTMLElement).style.transform = 'translateY(0)'
+                    if (!showProfileModal) {
+                      (e.target as HTMLElement).style.background = 'rgba(255, 255, 255, 0.1)'
+                      ;(e.target as HTMLElement).style.transform = 'translateY(0)'
+                    }
                   }}
                 >
                   <div style={{
@@ -398,8 +473,9 @@ export default function HomePage() {
         </div>
       </nav>
 
-      {/* Hero Section */}
-      <section style={{ position: 'relative', padding: '64px 24px', overflow: 'hidden' }}>
+      {/* Hero Section - Only show for non-logged-in users */}
+      {!user && (
+        <section style={{ position: 'relative', padding: '64px 24px', overflow: 'hidden' }}>
         <div style={{ maxWidth: '1280px', margin: '0 auto', textAlign: 'center', position: 'relative' }}>
           {/* Floating Elements */}
           <div style={{
@@ -509,9 +585,10 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+      )}
 
       {/* Search and Filter Section */}
-      <section style={{ padding: '0 24px 48px' }}>
+      <section style={{ padding: user ? '48px 24px 48px' : '0 24px 48px' }}>
         <div style={{ maxWidth: '1280px', margin: '0 auto' }}>
           <div style={{
             display: 'flex',
@@ -984,14 +1061,26 @@ export default function HomePage() {
           isOpen={showProfileModal}
           onClose={() => setShowProfileModal(false)}
           userId={user.id}
+          position={dropdownPosition}
         />
       )}
+
 
       {/* CSS Animations */}
       <style jsx>{`
         @keyframes float {
           0%, 100% { transform: translateY(0px); }
           50% { transform: translateY(-20px); }
+        }
+        @keyframes pulse {
+          0%, 100% { 
+            opacity: 1;
+            transform: scale(1);
+          }
+          50% { 
+            opacity: 0.8;
+            transform: scale(1.02);
+          }
         }
       `}</style>
     </div>
