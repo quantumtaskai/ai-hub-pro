@@ -48,12 +48,14 @@ export default function AgentLayout({ children, title, description, icon, cost }
               transition: 'all 0.2s ease'
             }}
             onMouseEnter={(e) => {
-              (e.target as HTMLElement).style.borderColor = '#3b82f6'
-              (e.target as HTMLElement).style.color = '#3b82f6'
+              const target = e.target as HTMLElement
+              target.style.borderColor = '#3b82f6'
+              target.style.color = '#3b82f6'
             }}
             onMouseLeave={(e) => {
-              (e.target as HTMLElement).style.borderColor = '#e5e7eb'
-              (e.target as HTMLElement).style.color = '#374151'
+              const target = e.target as HTMLElement
+              target.style.borderColor = '#e5e7eb'
+              target.style.color = '#374151'
             }}
           >
             ← Back to Agents

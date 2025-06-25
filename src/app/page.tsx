@@ -21,7 +21,7 @@ const AGENTS = [
     rating: 4.9,
     reviews: 2300,
     initials: 'CS',
-    gradient: 'from-blue-500 to-purple-600'
+    gradient: 'from-blue-500 to-blue-600'
   },
   {
     id: 2,
@@ -54,7 +54,7 @@ const AGENTS = [
     rating: 4.9,
     reviews: 2700,
     initials: 'EA',
-    gradient: 'from-purple-500 to-pink-600'
+    gradient: 'from-violet-500 to-purple-600'
   },
   {
     id: 5,
@@ -65,7 +65,7 @@ const AGENTS = [
     rating: 4.6,
     reviews: 1900,
     initials: 'SA',
-    gradient: 'from-indigo-500 to-blue-600'
+    gradient: 'from-rose-500 to-pink-600'
   },
   {
     id: 6,
@@ -87,7 +87,7 @@ const AGENTS = [
     rating: 4.9,
     reviews: 1650,
     initials: 'WR',
-    gradient: 'from-sky-500 to-blue-600'
+    gradient: 'from-sky-400 to-blue-500'
   }
 ]
 
@@ -690,12 +690,13 @@ export default function HomePage() {
           ) : (
             <div style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(380px, 1fr))',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(360px, 1fr))',
               gap: '24px'
             }}>
               {filteredAgents.map(agent => (
                 <div
                   key={agent.id}
+                  title=""
                   style={{
                     background: 'rgba(255, 255, 255, 0.8)',
                     borderRadius: '20px',
@@ -705,7 +706,11 @@ export default function HomePage() {
                     transition: 'all 0.3s ease',
                     cursor: 'pointer',
                     position: 'relative',
-                    overflow: 'hidden'
+                    overflow: 'hidden',
+                    minHeight: '300px',
+                    maxHeight: '300px',
+                    display: 'flex',
+                    flexDirection: 'column'
                   }}
                   onMouseEnter={(e) => {
                     (e.target as HTMLElement).style.transform = 'translateY(-8px)'
@@ -723,27 +728,37 @@ export default function HomePage() {
                     gap: '16px',
                     marginBottom: '20px'
                   }}>
-                    <div style={{
-                      width: '60px',
-                      height: '60px',
-                      borderRadius: '16px',
-                      background: `linear-gradient(135deg, ${agent.gradient})`,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      color: 'white',
-                      fontWeight: 'bold',
-                      fontSize: '20px'
-                    }}>
+                    <div 
+                      title=""
+                      style={{
+                        width: '60px',
+                        height: '60px',
+                        borderRadius: '16px',
+                        background: `linear-gradient(135deg, ${agent.gradient})`,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: 'white',
+                        fontWeight: 'bold',
+                        fontSize: '20px'
+                      }}>
                       {agent.initials}
                     </div>
                     <div style={{ flex: 1 }}>
-                      <h3 style={{
-                        fontSize: '20px',
-                        fontWeight: 'bold',
-                        color: '#1f2937',
-                        marginBottom: '4px'
-                      }}>
+                      <h3 
+                        title=""
+                        style={{
+                          fontSize: '18px',
+                          fontWeight: 'bold',
+                          color: '#1f2937',
+                          marginBottom: '4px',
+                          lineHeight: '1.3',
+                          wordWrap: 'break-word',
+                          hyphens: 'auto',
+                          maxWidth: '100%',
+                          overflow: 'hidden',
+                          textOverflow: 'clip'
+                        }}>
                         {agent.name}
                       </h3>
                       <div style={{
@@ -751,8 +766,8 @@ export default function HomePage() {
                         alignItems: 'center',
                         gap: '8px'
                       }}>
-                        <span style={{ color: '#fbbf24' }}>⭐</span>
-                        <span style={{ color: '#6b7280', fontSize: '14px' }}>
+                        <span title="" style={{ color: '#fbbf24' }}>⭐</span>
+                        <span title="" style={{ color: '#6b7280', fontSize: '14px' }}>
                           {agent.rating} ({agent.reviews.toLocaleString()} reviews)
                         </span>
                       </div>
@@ -760,11 +775,22 @@ export default function HomePage() {
                   </div>
 
                   {/* Agent Description */}
-                  <p style={{
-                    color: '#6b7280',
-                    lineHeight: '1.6',
-                    marginBottom: '24px'
-                  }}>
+                  <p 
+                    title=""
+                    style={{
+                      color: '#6b7280',
+                      lineHeight: '1.5',
+                      marginBottom: '24px',
+                      fontSize: '14px',
+                      flex: 1,
+                      wordWrap: 'break-word',
+                      overflow: 'hidden',
+                      textOverflow: 'clip',
+                      display: '-webkit-box',
+                      WebkitLineClamp: 3,
+                      WebkitBoxOrient: 'vertical',
+                      maxHeight: '63px'
+                    }}>
                     {agent.description}
                   </p>
 
@@ -772,15 +798,16 @@ export default function HomePage() {
                   <div style={{
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: 'space-between'
+                    justifyContent: 'space-between',
+                    marginTop: 'auto'
                   }}>
                     <div style={{
                       display: 'flex',
                       alignItems: 'center',
                       gap: '8px'
                     }}>
-                      <span style={{ color: '#10b981', fontWeight: 'bold' }}>✨</span>
-                      <span style={{ color: '#1f2937', fontWeight: '600' }}>
+                      <span title="" style={{ color: '#10b981', fontWeight: 'bold' }}>✨</span>
+                      <span title="" style={{ color: '#1f2937', fontWeight: '600' }}>
                         {agent.cost} credits
                       </span>
                     </div>
