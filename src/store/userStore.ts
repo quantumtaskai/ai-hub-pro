@@ -11,7 +11,9 @@ interface UserState {
   signUp: (email: string, password: string, name: string) => Promise<void>
   signIn: (email: string, password: string) => Promise<void>
   signOut: () => Promise<void>
+  resetPassword: (email: string) => Promise<void>
   updateCredits: (amount: number) => Promise<void>
+  refreshUser: () => Promise<void>
   setUser: (user: User | null) => void
   setLoading: (loading: boolean) => void
   setError: (error: string | null) => void
@@ -127,6 +129,24 @@ export const useUserStore = create<UserState>()(
         }
       },
 
+      resetPassword: async (email: string) => {
+        set({ isLoading: true, error: null })
+        try {
+          console.log('Sending password reset email to:', email)
+          const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+            redirectTo: `${window.location.origin}/reset-password`
+          })
+          console.log('Reset password result:', { data, error })
+          if (error) throw error
+          set({ isLoading: false })
+          console.log('Password reset email sent successfully')
+        } catch (error: any) {
+          console.error('Password reset failed:', error)
+          set({ error: error.message, isLoading: false })
+          throw error
+        }
+      },
+
       updateCredits: async (amount: number) => {
         const { user } = get()
         if (!user) return
@@ -154,6 +174,24 @@ export const useUserStore = create<UserState>()(
           console.error('Credit update failed:', error)
           set({ error: error.message })
           throw error
+        }
+      },
+
+      refreshUser: async () => {
+        try {
+          const { data: authUser } = await supabase.auth.getUser()
+          if (!authUser.user) return
+
+          const { data: userData, error } = await supabase
+            .from('users')
+            .select('*')
+            .eq('id', authUser.user.id)
+            .single()
+          
+          if (error) throw error
+          set({ user: userData })
+        } catch (error: any) {
+          console.error('Failed to refresh user:', error)
         }
       },
 

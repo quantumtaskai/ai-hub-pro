@@ -6,6 +6,7 @@ import { useUserStore } from '@/store/userStore'
 import { AgentService } from '@/lib/agentService'
 import { Agent } from '@/lib/supabase'
 import AuthModal from '@/components/AuthModal'
+import ProfileModal from '@/components/ProfileModal'
 
 // Complete agent data matching your original design
 const AGENTS = [
@@ -104,13 +105,14 @@ export default function HomePage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [showAuthModal, setShowAuthModal] = useState(false)
-  const [authMode, setAuthMode] = useState<'login' | 'register'>('login')
+  const [authMode, setAuthMode] = useState<'login' | 'register' | 'reset'>('login')
   const [isProcessing, setIsProcessing] = useState<number | null>(null)
   const [showResultModal, setShowResultModal] = useState(false)
   const [showCreditModal, setShowCreditModal] = useState(false)
   const [selectedCreditPack, setSelectedCreditPack] = useState<any>(null)
   const [lastResult, setLastResult] = useState('')
   const [isLoading, setIsLoading] = useState(true)
+  const [showProfileModal, setShowProfileModal] = useState(false)
 
   // Credit packages
   const CREDIT_PACKAGES = [
@@ -263,8 +265,11 @@ export default function HomePage() {
                 }}
                 onError={(e) => {
                   // Fallback if logo image doesn't exist
-                  e.target.style.display = 'none'
-                  e.target.nextSibling.style.display = 'block'
+                  const target = e.target as HTMLImageElement;
+                  target.style.display = 'none';
+                  if (target.nextSibling) {
+                    (target.nextSibling as HTMLElement).style.display = 'block';
+                  }
                 }}
               />
               <div style={{
@@ -330,6 +335,22 @@ export default function HomePage() {
                     {user.name.charAt(0).toUpperCase()}
                   </div>
                   <span style={{ color: '#1f2937', fontWeight: '600' }}>{user.name}</span>
+                  <button
+                    onClick={() => setShowProfileModal(true)}
+                    style={{
+                      background: 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)',
+                      color: 'white',
+                      border: 'none',
+                      padding: '8px 16px',
+                      borderRadius: '8px',
+                      fontSize: '14px',
+                      cursor: 'pointer',
+                      marginLeft: '8px',
+                      fontWeight: 500
+                    }}
+                  >
+                    Profile
+                  </button>
                   <button
                     onClick={handleLogout}
                     style={{
@@ -960,6 +981,15 @@ export default function HomePage() {
             )}
           </div>
         </div>
+      )}
+
+      {/* Profile Modal */}
+      {user && (
+        <ProfileModal
+          isOpen={showProfileModal}
+          onClose={() => setShowProfileModal(false)}
+          userId={user.id}
+        />
       )}
 
       {/* CSS Animations */}
