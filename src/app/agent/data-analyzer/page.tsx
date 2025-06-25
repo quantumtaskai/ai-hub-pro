@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { toast, Toaster } from 'react-hot-toast'
 import { useUserStore } from '@/store/userStore'
@@ -11,7 +11,7 @@ import ProcessingStatus from '@/components/agent-shared/ProcessingStatus'
 import ResultsDisplay from '@/components/agent-shared/ResultsDisplay'
 import CreditCounter from '@/components/agent-shared/CreditCounter'
 
-export default function DataAnalyzerPage() {
+function DataAnalyzerForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { user, updateCredits } = useUserStore()
@@ -257,5 +257,23 @@ export default function DataAnalyzerPage() {
         </div>
       </div>
     </AgentLayout>
+  )
+}
+
+export default function DataAnalyzerPage() {
+  return (
+    <Suspense fallback={
+      <div style={{
+        minHeight: '100vh',
+        background: 'linear-gradient(135deg, #f6f8ff 0%, #e8f0fe 50%, #f0f7ff 100%)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}>
+        <div style={{ color: '#3b82f6', fontSize: '18px' }}>Loading...</div>
+      </div>
+    }>
+      <DataAnalyzerForm />
+    </Suspense>
   )
 }
