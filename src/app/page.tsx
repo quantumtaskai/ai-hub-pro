@@ -2,9 +2,11 @@
 
 import { useState, useEffect } from 'react'
 import { toast, Toaster } from 'react-hot-toast'
+import { useRouter } from 'next/navigation'
 import { useUserStore } from '@/store/userStore'
 import { AgentService } from '@/lib/agentService'
 import { Agent } from '@/lib/supabase'
+import { getAgentSlug } from '@/lib/agentUtils'
 import AuthModal from '@/components/AuthModal'
 import ProfileModal from '@/components/ProfileModal'
 
@@ -100,6 +102,7 @@ const AI_RESPONSES = {
 }
 
 export default function HomePage() {
+  const router = useRouter()
   const { user, signOut, updateCredits } = useUserStore()
   const [agents, setAgents] = useState<Agent[]>([])
   const [searchTerm, setSearchTerm] = useState('')
@@ -183,7 +186,7 @@ export default function HomePage() {
     }
   }
 
-  const useAgent = async (agent: Agent) => {
+  const useAgent = (agent: Agent) => {
     if (!user) {
       setShowAuthModal(true)
       return
@@ -194,25 +197,9 @@ export default function HomePage() {
       return
     }
 
-    setIsProcessing(agent.id)
-    toast.loading('Agent is processing your request...', { duration: 2000 })
-
-    try {
-      // Use agent and get result
-      const result = await AgentService.useAgent(user.id, agent.id, agent.name, agent.cost)
-      
-      // Update credits in database
-      await updateCredits(-agent.cost)
-
-      // Show result
-      setLastResult(result)
-      setShowResultModal(true)
-      toast.success(`${agent.name} completed! ${agent.cost} credits used.`)
-    } catch (error) {
-      toast.error('Failed to use agent. Please try again.')
-    } finally {
-      setIsProcessing(null)
-    }
+    // Get agent slug and redirect to agent page
+    const slug = getAgentSlug(agent.name)
+    router.push(`/agent/${slug}?agentId=${agent.id}&cost=${agent.cost}`)
   }
 
   return (
