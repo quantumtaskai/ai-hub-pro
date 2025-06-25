@@ -77,6 +77,17 @@ const AGENTS = [
     reviews: 4200,
     initials: 'TA',
     gradient: 'from-teal-500 to-cyan-600'
+  },
+  {
+    id: 7,
+    name: 'Weather Reporter Agent',
+    description: 'Get detailed weather reports for any location worldwide with current conditions, forecasts, and weather alerts.',
+    category: 'utilities',
+    cost: 15,
+    rating: 4.9,
+    reviews: 1650,
+    initials: 'WR',
+    gradient: 'from-sky-500 to-blue-600'
   }
 ]
 
@@ -125,7 +136,7 @@ export default function HomePage() {
     { id: 4, credits: 7500, price: 99.99, popular: false }
   ]
 
-  // Load agents from database
+  // Load agents (use hardcoded agents for now)
   useEffect(() => {
     loadAgents()
   }, [])
@@ -133,8 +144,8 @@ export default function HomePage() {
   const loadAgents = async () => {
     try {
       setIsLoading(true)
-      const agentsData = await AgentService.getAgents()
-      setAgents(agentsData)
+      // Use hardcoded agents instead of database for this demo
+      setAgents(AGENTS as any)
     } catch (error) {
       console.error('Failed to load agents:', error)
       toast.error('Failed to load agents')

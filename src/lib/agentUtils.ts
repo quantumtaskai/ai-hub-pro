@@ -6,7 +6,8 @@ export const getAgentSlug = (agentName: string): string => {
     'Content Writing Agent': 'content-writer',
     'Email Automation Agent': 'email-automation',
     'Sales Assistant Agent': 'sales-assistant',
-    'Task Automation Agent': 'task-automation'
+    'Task Automation Agent': 'task-automation',
+    'Weather Reporter Agent': 'weather-reporter'
   }
   
   return slugMap[agentName] || 'default-agent'
@@ -20,7 +21,8 @@ export const getAgentNameFromSlug = (slug: string): string => {
     'content-writer': 'Content Writing Agent', 
     'email-automation': 'Email Automation Agent',
     'sales-assistant': 'Sales Assistant Agent',
-    'task-automation': 'Task Automation Agent'
+    'task-automation': 'Task Automation Agent',
+    'weather-reporter': 'Weather Reporter Agent'
   }
   
   return nameMap[slug] || 'Unknown Agent'
@@ -58,6 +60,11 @@ export const getAgentInfo = (slug: string) => {
       title: 'Workflow Automation Hub',
       description: 'Connect apps and automate repetitive tasks',
       icon: '⚡'
+    },
+    'weather-reporter': {
+      title: 'Weather Reporter',
+      description: 'Get detailed weather reports for any location worldwide',
+      icon: '🌤️'
     }
   }
   
