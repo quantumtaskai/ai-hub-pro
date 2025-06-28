@@ -48,9 +48,14 @@ const CREDIT_PACKAGES = [
 function PricingForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const { user, refreshUser, purchaseCredits, updateCredits } = useUserStore()
+  const { user, refreshUser, purchaseCredits, updateCredits, initializeSession } = useUserStore()
   const [selectedPackage, setSelectedPackage] = useState<number | null>(null)
   const [isProcessing, setIsProcessing] = useState(false)
+
+  // Initialize session on component mount
+  useEffect(() => {
+    initializeSession()
+  }, [])
 
   // Handle payment success/cancellation from URL params
   useEffect(() => {
@@ -61,10 +66,14 @@ function PricingForm() {
 
     if (success === 'true' || payment === 'success') {
       toast.success('Payment successful! Credits have been added to your account.')
-      // Refresh user data to show new credits
-      if (user) {
-        refreshUser()
-      }
+      // Force refresh user data to show new credits (with delay to ensure webhook processed)
+      setTimeout(async () => {
+        try {
+          await refreshUser()
+        } catch (error) {
+          console.log('Failed to refresh after payment, but payment was successful')
+        }
+      }, 2000)
       // Clean up URL
       router.replace('/pricing')
     } else if (cancelled === 'true') {
@@ -72,7 +81,7 @@ function PricingForm() {
       // Clean up URL
       router.replace('/pricing')
     }
-  }, [searchParams, user, refreshUser, router])
+  }, [searchParams, refreshUser, router])
 
   // Redirect to login if not authenticated
   useEffect(() => {
@@ -159,39 +168,15 @@ function PricingForm() {
             </h1>
           </div>
           
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <div style={{
-              background: 'rgba(59, 130, 246, 0.1)',
-              border: '1px solid rgba(59, 130, 246, 0.2)',
-              borderRadius: '12px',
-              padding: '12px 20px',
-              color: '#3b82f6',
-              fontWeight: '600'
-            }}>
-              Current Balance: {user.credits} credits
-            </div>
-            <button
-              onClick={async () => {
-                try {
-                  await refreshUser()
-                  toast.success('Credits refreshed!')
-                } catch (error) {
-                  toast.error('Failed to refresh credits')
-                }
-              }}
-              style={{
-                background: 'rgba(16, 185, 129, 0.1)',
-                border: '1px solid rgba(16, 185, 129, 0.2)',
-                borderRadius: '8px',
-                padding: '8px 16px',
-                color: '#10b981',
-                fontSize: '14px',
-                fontWeight: '600',
-                cursor: 'pointer'
-              }}
-            >
-              🔄 Refresh
-            </button>
+          <div style={{
+            background: 'rgba(59, 130, 246, 0.1)',
+            border: '1px solid rgba(59, 130, 246, 0.2)',
+            borderRadius: '12px',
+            padding: '12px 20px',
+            color: '#3b82f6',
+            fontWeight: '600'
+          }}>
+            Current Balance: {user.credits} credits
           </div>
         </div>
       </div>

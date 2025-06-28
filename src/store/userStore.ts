@@ -15,6 +15,7 @@ interface UserState {
   updateCredits: (amount: number) => Promise<void>
   purchaseCredits: (credits: number) => void
   refreshUser: () => Promise<void>
+  initializeSession: () => Promise<void>
   setUser: (user: User | null) => void
   setLoading: (loading: boolean) => void
   setError: (error: string | null) => void
@@ -181,9 +182,20 @@ export const useUserStore = create<UserState>()(
       refreshUser: async () => {
         try {
           console.log('🔄 Refreshing user data from database...')
-          const { data: authUser } = await supabase.auth.getUser()
-          if (!authUser.user) {
-            console.log('❌ No auth user found')
+          
+          // First check current session
+          const { data: session } = await supabase.auth.getSession()
+          if (!session.session) {
+            console.log('❌ No active session found')
+            set({ user: null, error: 'Session expired. Please log in again.' })
+            return
+          }
+
+          // Then get the user
+          const { data: authUser, error: authError } = await supabase.auth.getUser()
+          if (authError || !authUser.user) {
+            console.log('❌ No auth user found:', authError?.message)
+            set({ user: null, error: 'Authentication failed. Please log in again.' })
             return
           }
 
@@ -204,9 +216,10 @@ export const useUserStore = create<UserState>()(
             email: userData.email, 
             credits: userData.credits 
           })
-          set({ user: userData })
+          set({ user: userData, error: null })
         } catch (error: any) {
           console.error('❌ Failed to refresh user:', error)
+          set({ error: error.message })
           throw error
         }
       },
@@ -247,7 +260,40 @@ export const useUserStore = create<UserState>()(
 
       setUser: (user: User | null) => set({ user }),
       setLoading: (isLoading: boolean) => set({ isLoading }),
-      setError: (error: string | null) => set({ error })
+      setError: (error: string | null) => set({ error }),
+
+      // Initialize session - called on app start
+      initializeSession: async () => {
+        try {
+          console.log('🚀 Initializing session...')
+          const { data: session } = await supabase.auth.getSession()
+          
+          if (session.session && session.session.user) {
+            console.log('📱 Found existing session for:', session.session.user.id)
+            
+            // Fetch user data from database
+            const { data: userData, error } = await supabase
+              .from('users')
+              .select('*')
+              .eq('id', session.session.user.id)
+              .single()
+            
+            if (!error && userData) {
+              console.log('✅ Session restored:', { id: userData.id, email: userData.email, credits: userData.credits })
+              set({ user: userData, error: null })
+            } else {
+              console.log('❌ User data not found for session')
+              set({ user: null })
+            }
+          } else {
+            console.log('ℹ️ No existing session found')
+            set({ user: null })
+          }
+        } catch (error: any) {
+          console.error('❌ Failed to initialize session:', error)
+          set({ user: null, error: error.message })
+        }
+      }
     }),
     {
       name: 'user-storage',
