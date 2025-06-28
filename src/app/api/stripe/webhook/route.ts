@@ -42,8 +42,34 @@ export async function POST(request: Request) {
     if (event.type === 'checkout.session.completed') {
       const session = event.data.object as Stripe.Checkout.Session
       const userId = session.client_reference_id
-      const credits = session.metadata?.credits
       const customerEmail = session.customer_details?.email
+      
+      // Try to extract credits from multiple sources
+      let credits = session.metadata?.credits
+      
+      // Fallback: Extract credits from payment amount (AED pricing)
+      if (!credits && session.amount_total) {
+        const amountAED = session.amount_total / 100 // Convert from fils to AED
+        const creditMapping: { [key: number]: string } = {
+          9.99: '10',
+          49.99: '50', 
+          99.99: '100',
+          499.99: '500'
+        }
+        credits = creditMapping[amountAED]
+      }
+      
+      // Fallback: Extract from payment link name if available
+      if (!credits && session.payment_link) {
+        try {
+          const paymentLink = await stripe.paymentLinks.retrieve(session.payment_link as string)
+          if (paymentLink.metadata?.credits) {
+            credits = paymentLink.metadata.credits
+          }
+        } catch (error) {
+          console.log('ℹ️ Could not retrieve payment link metadata:', error)
+        }
+      }
 
       console.log('💳 Processing checkout completion:', {
         sessionId: session.id,
@@ -53,11 +79,18 @@ export async function POST(request: Request) {
         paymentStatus: session.payment_status,
         amountTotal: session.amount_total,
         currency: session.currency,
-        metadata: session.metadata
+        metadata: session.metadata,
+        extractionMethod: session.metadata?.credits ? 'metadata' : 
+                         session.amount_total ? 'amount' : 'unknown'
       })
 
       if (!credits) {
-        console.error('❌ Missing required credits data:', { credits })
+        console.error('❌ Missing required credits data:', { 
+          credits,
+          metadata: session.metadata,
+          amountTotal: session.amount_total,
+          paymentLink: session.payment_link
+        })
         return NextResponse.json(
           { error: 'Missing required credits amount' },
           { status: 400 }
