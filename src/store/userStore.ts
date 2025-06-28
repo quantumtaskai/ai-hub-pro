@@ -231,12 +231,12 @@ export const useUserStore = create<UserState>()(
           return
         }
 
-        // Payment Links for each credit package
+        // Payment Links for each credit package (created via Stripe CLI)
         const paymentLinks = {
-          10: 'https://buy.stripe.com/test_00w5kD6AAaxK8Cw8zl2VG08',
-          50: 'https://buy.stripe.com/test_8x2aEXf76bBOaKE9Dp2VG05',
-          100: 'https://buy.stripe.com/test_eVq14n3oo21e7ysbLx2VG06',
-          500: 'https://buy.stripe.com/test_bJe14ne327ly3ic2aX2VG07'
+          10: 'https://buy.stripe.com/test_28EbJ16AA7ly3ic7vh2VG0a',     // Basic Package - 9.99 AED
+          50: 'https://buy.stripe.com/test_4gM00jbUUgW83ic3f12VG0b',     // Popular Package - 49.99 AED  
+          100: 'https://buy.stripe.com/test_aFadR99MM35ibOI6rd2VG0c',    // Premium Package - 99.99 AED
+          500: 'https://buy.stripe.com/test_14AbJ12kk7lyf0U16T2VG0d'     // Enterprise Package - 499.99 AED
         }
 
         const paymentLink = paymentLinks[credits as keyof typeof paymentLinks]
