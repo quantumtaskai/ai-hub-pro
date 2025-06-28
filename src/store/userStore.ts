@@ -13,6 +13,7 @@ interface UserState {
   signOut: () => Promise<void>
   resetPassword: (email: string) => Promise<void>
   updateCredits: (amount: number) => Promise<void>
+  purchaseCredits: (credits: number) => void
   refreshUser: () => Promise<void>
   setUser: (user: User | null) => void
   setLoading: (loading: boolean) => void
@@ -193,6 +194,40 @@ export const useUserStore = create<UserState>()(
         } catch (error: any) {
           console.error('Failed to refresh user:', error)
         }
+      },
+
+      purchaseCredits: (credits: number) => {
+        const { user } = get()
+        if (!user) {
+          console.error('❌ Cannot purchase credits: No user found')
+          return
+        }
+
+        // Payment Links for each credit package (will be updated with real URLs)
+        const paymentLinks = {
+          10: 'https://buy.stripe.com/test_placeholder_10_credits',
+          50: 'https://buy.stripe.com/test_placeholder_50_credits',
+          100: 'https://buy.stripe.com/test_placeholder_100_credits',
+          500: 'https://buy.stripe.com/test_placeholder_500_credits'
+        }
+
+        const paymentLink = paymentLinks[credits as keyof typeof paymentLinks]
+        if (!paymentLink) {
+          console.error('❌ Invalid credit package:', credits)
+          return
+        }
+
+        // Add user ID to payment link for webhook processing
+        const url = `${paymentLink}?client_reference_id=${user.id}&prefilled_email=${encodeURIComponent(user.email)}`
+        
+        console.log('🔗 Redirecting to payment:', { 
+          credits, 
+          url,
+          userId: user.id 
+        })
+        
+        // Open payment link in new tab
+        window.open(url, '_blank')
       },
 
       setUser: (user: User | null) => set({ user }),

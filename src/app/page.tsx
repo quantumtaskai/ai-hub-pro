@@ -266,21 +266,31 @@ export default function HomePage() {
                 AgentHub
               </div>
             </div>
-            {!user && (
-              <div style={{ display: 'flex', gap: '32px' }}>
-                <span style={{ color: '#6366f1', fontWeight: '600' }}>Home</span>
-                <span style={{ color: '#9ca3af', fontWeight: '500' }}>Agents</span>
-                <span style={{ color: '#9ca3af', fontWeight: '500' }}>Categories</span>
-                <span style={{ color: '#9ca3af', fontWeight: '500' }}>Pricing</span>
-              </div>
-            )}
+            <div style={{ display: 'flex', gap: '32px' }}>
+              <span style={{ color: '#6366f1', fontWeight: '600' }}>Home</span>
+              <span style={{ color: '#9ca3af', fontWeight: '500' }}>Agents</span>
+              <span style={{ color: '#9ca3af', fontWeight: '500' }}>Categories</span>
+              <span 
+                onClick={() => router.push('/pricing')}
+                style={{ 
+                  color: '#9ca3af', 
+                  fontWeight: '500', 
+                  cursor: 'pointer',
+                  transition: 'color 0.2s ease'
+                }}
+                onMouseEnter={(e) => (e.target as HTMLElement).style.color = '#6366f1'}
+                onMouseLeave={(e) => (e.target as HTMLElement).style.color = '#9ca3af'}
+              >
+                Pricing
+              </span>
+            </div>
           </div>
           
           <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
             {user ? (
               <>
                 <div 
-                  onClick={() => setShowCreditModal(true)}
+                  onClick={() => router.push('/pricing')}
                   style={{
                     background: user.credits <= 100 
                       ? 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)'
