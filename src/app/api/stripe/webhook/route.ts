@@ -7,124 +7,162 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 })
 
 export async function POST(request: Request) {
-  const body = await request.text()
-  const signature = request.headers.get('stripe-signature') || ''
-
-  console.log('🔔 Webhook received:', {
-    hasSignature: !!signature,
-    bodyLength: body.length,
-    timestamp: new Date().toISOString()
-  })
-
-  if (!signature) {
-    console.error('❌ Missing stripe signature')
-    return NextResponse.json(
-      { error: 'Missing stripe signature' },
-      { status: 400 }
-    )
-  }
+  const startTime = Date.now()
+  console.log('🔔 Webhook started at:', new Date().toISOString())
 
   try {
-    // Verify webhook signature
-    const event = stripe.webhooks.constructEvent(
-      body,
-      signature,
-      process.env.STRIPE_WEBHOOK_SECRET!
-    )
+    // Read request body
+    const body = await request.text()
+    const signature = request.headers.get('stripe-signature') || ''
 
-    console.log('✅ Webhook signature verified. Event:', {
-      type: event.type,
-      id: event.id,
-      created: new Date(event.created * 1000).toISOString()
+    console.log('📥 Webhook request:', {
+      hasSignature: !!signature,
+      bodyLength: body.length,
+      hasWebhookSecret: !!process.env.STRIPE_WEBHOOK_SECRET,
+      hasSupabaseKey: !!process.env.SUPABASE_SERVICE_ROLE_KEY
     })
 
-    // Handle successful checkout completion
+    // Check environment variables
+    if (!process.env.STRIPE_WEBHOOK_SECRET) {
+      console.error('❌ STRIPE_WEBHOOK_SECRET not configured')
+      return NextResponse.json(
+        { error: 'Webhook secret not configured' },
+        { status: 500 }
+      )
+    }
+
+    if (!signature) {
+      console.error('❌ Missing stripe signature')
+      return NextResponse.json(
+        { error: 'Missing stripe signature' },
+        { status: 400 }
+      )
+    }
+
+    // Verify webhook signature
+    let event: Stripe.Event
+    try {
+      event = stripe.webhooks.constructEvent(
+        body,
+        signature,
+        process.env.STRIPE_WEBHOOK_SECRET
+      )
+      console.log('✅ Webhook signature verified:', event.type)
+    } catch (err: any) {
+      console.error('❌ Webhook signature verification failed:', err.message)
+      return NextResponse.json(
+        { error: 'Invalid signature' },
+        { status: 400 }
+      )
+    }
+
+    // Handle checkout.session.completed
     if (event.type === 'checkout.session.completed') {
       const session = event.data.object as Stripe.Checkout.Session
-      const userId = session.client_reference_id
-      const customerEmail = session.customer_details?.email
       
-      // Simple amount to credits mapping (AED pricing)
-      const amountAED = Math.round((session.amount_total || 0) / 100 * 100) / 100 // Convert from fils to AED and round
-      
-      let credits: number = 0
+      console.log('💳 Processing checkout session:', {
+        sessionId: session.id,
+        paymentStatus: session.payment_status,
+        status: session.status,
+        amountTotal: session.amount_total,
+        currency: session.currency,
+        clientReferenceId: session.client_reference_id,
+        customerEmail: session.customer_details?.email,
+        metadata: session.metadata
+      })
+
+      // Validate session
+      if (session.payment_status !== 'paid' || session.status !== 'complete') {
+        console.log('ℹ️ Session not yet complete, skipping:', {
+          paymentStatus: session.payment_status,
+          status: session.status
+        })
+        return NextResponse.json({ received: true })
+      }
+
+      // Calculate credits from amount
+      const amountAED = Math.round((session.amount_total || 0) / 100 * 100) / 100
+      let credits = 0
       if (amountAED >= 499.99) credits = 500
       else if (amountAED >= 99.99) credits = 100
       else if (amountAED >= 49.99) credits = 50
       else if (amountAED >= 9.99) credits = 10
 
-      console.log('💳 Processing payment:', {
-        sessionId: session.id,
-        userId,
-        customerEmail,
+      console.log('🧮 Credit calculation:', {
         amountTotal: session.amount_total,
         amountAED,
-        credits,
-        paymentStatus: session.payment_status
+        calculatedCredits: credits,
+        metadataCredits: session.metadata?.credits
       })
 
       if (!credits) {
-        console.error('❌ Unknown payment amount:', { 
-          amountTotal: session.amount_total,
-          amountAED,
-          expectedAmounts: [9.99, 49.99, 99.99, 499.99]
-        })
+        console.error('❌ Invalid payment amount:', { amountAED, amountTotal: session.amount_total })
         return NextResponse.json(
-          { error: `Unknown payment amount: ${amountAED} AED (from ${session.amount_total} fils)` },
+          { error: `Invalid payment amount: ${amountAED} AED` },
           { status: 400 }
         )
       }
 
-      if (!userId && !customerEmail) {
-        console.error('❌ No user identification:', { userId, customerEmail })
-        return NextResponse.json(
-          { error: 'Missing user identification' },
-          { status: 400 }
-        )
-      }
+      // Find user
+      const userId = session.client_reference_id
+      const customerEmail = session.customer_details?.email
+      let userData = null
 
-      let userData, fetchError
+      console.log('🔍 Looking up user:', { userId, customerEmail })
 
-      // Try to find user by ID first, then by email if ID lookup fails
+      // Try user lookup by ID first
       if (userId) {
-        const result = await supabaseAdmin
-          .from('users')
-          .select('*')
-          .eq('id', userId)
-          .single()
-        userData = result.data
-        fetchError = result.error
+        try {
+          const { data, error } = await supabaseAdmin
+            .from('users')
+            .select('*')
+            .eq('id', userId)
+            .single()
+          
+          if (!error && data) {
+            userData = data
+            console.log('✅ User found by ID:', { id: data.id, email: data.email, credits: data.credits })
+          } else {
+            console.log('❌ User not found by ID:', error?.message)
+          }
+        } catch (err: any) {
+          console.error('❌ Error looking up user by ID:', err.message)
+        }
       }
 
-      // If no user found by ID, or no ID provided, try email lookup
+      // Try user lookup by email if ID failed
       if (!userData && customerEmail) {
-        console.log('🔍 User not found by ID, trying email lookup:', customerEmail)
-        const result = await supabaseAdmin
-          .from('users')
-          .select('*')
-          .eq('email', customerEmail)
-          .single()
-        userData = result.data
-        fetchError = result.error
+        try {
+          const { data, error } = await supabaseAdmin
+            .from('users')
+            .select('*')
+            .eq('email', customerEmail)
+            .single()
+          
+          if (!error && data) {
+            userData = data
+            console.log('✅ User found by email:', { id: data.id, email: data.email, credits: data.credits })
+          } else {
+            console.log('❌ User not found by email:', error?.message)
+          }
+        } catch (err: any) {
+          console.error('❌ Error looking up user by email:', err.message)
+        }
       }
 
-      if (fetchError || !userData) {
-        console.error('❌ Failed to fetch user:', { 
-          fetchError: fetchError?.message,
-          userId, 
-          customerEmail,
-          errorCode: fetchError?.code
-        })
+      if (!userData) {
+        console.error('❌ User not found anywhere:', { userId, customerEmail })
         return NextResponse.json(
-          { error: 'User not found in database' },
+          { error: 'User not found' },
           { status: 404 }
         )
       }
 
+      // Update credits
       const currentCredits = userData.credits || 0
       const newTotal = currentCredits + credits
 
-      console.log('📈 Adding credits:', {
+      console.log('📈 Updating credits:', {
         userId: userData.id,
         email: userData.email,
         currentCredits,
@@ -132,51 +170,67 @@ export async function POST(request: Request) {
         newTotal
       })
 
-      // Simple credit update
-      const { data: updatedUser, error: updateError } = await supabaseAdmin
-        .from('users')
-        .update({ credits: newTotal })
-        .eq('id', userData.id)
-        .select()
-        .single()
+      try {
+        const { data: updatedUser, error: updateError } = await supabaseAdmin
+          .from('users')
+          .update({ 
+            credits: newTotal,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', userData.id)
+          .select()
+          .single()
 
-      if (updateError) {
-        console.error('❌ Credit update failed:', updateError)
+        if (updateError) {
+          console.error('❌ Failed to update credits:', updateError)
+          return NextResponse.json(
+            { error: 'Failed to update credits' },
+            { status: 500 }
+          )
+        }
+
+        const processingTime = Date.now() - startTime
+        console.log('✅ Credits updated successfully:', {
+          userId: userData.id,
+          email: userData.email,
+          oldCredits: currentCredits,
+          newCredits: updatedUser.credits,
+          creditsAdded: credits,
+          sessionId: session.id,
+          processingTimeMs: processingTime
+        })
+
+        return NextResponse.json({
+          success: true,
+          creditsAdded: credits,
+          newTotal: updatedUser.credits,
+          processingTimeMs: processingTime
+        })
+
+      } catch (err: any) {
+        console.error('❌ Database error:', err.message)
         return NextResponse.json(
-          { error: 'Failed to update credits' },
+          { error: 'Database error' },
           { status: 500 }
         )
       }
-
-      console.log('✅ Credits added successfully:', {
-        userId: userData.id,
-        email: userData.email,
-        oldCredits: currentCredits,
-        newCredits: updatedUser.credits,
-        creditsAdded: credits
-      })
-
-      return NextResponse.json({ 
-        success: true,
-        creditsAdded: credits,
-        newTotal: updatedUser.credits
-      })
     }
 
-    console.log('ℹ️ Unhandled webhook event type:', event.type)
-    return NextResponse.json({ success: true })
+    // Other webhook events
+    console.log('ℹ️ Unhandled webhook event:', event.type)
+    return NextResponse.json({ received: true })
 
   } catch (error: any) {
-    console.error('❌ Webhook error:', {
-      message: error.message,
-      type: error.type,
-      code: error.code,
-      stack: error.stack
+    const processingTime = Date.now() - startTime
+    console.error('❌ Webhook processing failed:', {
+      error: error.message,
+      stack: error.stack,
+      processingTimeMs: processingTime
     })
 
     return NextResponse.json(
-      { error: 'Webhook processing failed', details: error.message },
-      { status: 400 }
+      { error: 'Webhook processing failed' },
+      { status: 500 }
     )
   }
 }
