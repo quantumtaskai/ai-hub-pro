@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { toast, Toaster } from 'react-hot-toast'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useUserStore } from '@/store/userStore'
@@ -103,7 +103,7 @@ const CATEGORIES = [
 ]
 
 
-export default function HomePage() {
+function HomePageContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { user, signOut, refreshUser } = useUserStore()
@@ -951,5 +951,28 @@ export default function HomePage() {
         }
       `}</style>
     </div>
+  )
+}
+
+export default function HomePage() {
+  return (
+    <Suspense fallback={
+      <div style={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: 'linear-gradient(135deg, #f6f8ff 0%, #e8f0fe 50%, #f0f7ff 100%)'
+      }}>
+        <div style={{
+          fontSize: '18px',
+          color: '#6b7280'
+        }}>
+          Loading...
+        </div>
+      </div>
+    }>
+      <HomePageContent />
+    </Suspense>
   )
 }
