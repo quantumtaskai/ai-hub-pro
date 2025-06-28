@@ -48,7 +48,7 @@ const CREDIT_PACKAGES = [
 function PricingForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const { user, refreshUser, purchaseCredits } = useUserStore()
+  const { user, refreshUser, purchaseCredits, updateCredits } = useUserStore()
   const [selectedPackage, setSelectedPackage] = useState<number | null>(null)
   const [isProcessing, setIsProcessing] = useState(false)
 
@@ -100,6 +100,16 @@ function PricingForm() {
         setIsProcessing(false)
         setSelectedPackage(null)
       }, 1000)
+    }
+  }
+
+  const handleTestCredits = async (credits: number) => {
+    try {
+      await updateCredits(credits)
+      toast.success(`${credits} test credits added!`)
+      refreshUser()
+    } catch (error) {
+      toast.error('Failed to add test credits')
     }
   }
 
@@ -336,6 +346,63 @@ function PricingForm() {
             </div>
           ))}
         </div>
+
+        {/* Test Credits Section (Development Only) */}
+        {process.env.NODE_ENV === 'development' && (
+          <div style={{
+            marginTop: '60px',
+            padding: '32px',
+            background: 'rgba(255, 248, 220, 0.8)',
+            borderRadius: '16px',
+            border: '2px dashed #f59e0b',
+            maxWidth: '600px',
+            margin: '60px auto 0'
+          }}>
+            <h3 style={{
+              fontSize: '24px',
+              fontWeight: 'bold',
+              color: '#92400e',
+              marginBottom: '16px',
+              textAlign: 'center'
+            }}>
+              🚧 Development Mode - Test Credits
+            </h3>
+            <p style={{
+              color: '#92400e',
+              marginBottom: '24px',
+              textAlign: 'center'
+            }}>
+              Skip payments and add credits directly for testing
+            </p>
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(4, 1fr)',
+              gap: '12px'
+            }}>
+              {[10, 50, 100, 500].map(credits => (
+                <button
+                  key={credits}
+                  onClick={() => handleTestCredits(credits)}
+                  style={{
+                    background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+                    color: 'white',
+                    padding: '12px',
+                    borderRadius: '8px',
+                    border: 'none',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    transition: 'transform 0.2s ease'
+                  }}
+                  onMouseEnter={(e) => (e.target as HTMLElement).style.transform = 'scale(1.05)'}
+                  onMouseLeave={(e) => (e.target as HTMLElement).style.transform = 'scale(1)'}
+                >
+                  +{credits}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* FAQ Section */}
         <div style={{

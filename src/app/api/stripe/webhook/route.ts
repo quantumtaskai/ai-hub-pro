@@ -44,55 +44,30 @@ export async function POST(request: Request) {
       const userId = session.client_reference_id
       const customerEmail = session.customer_details?.email
       
-      // Try to extract credits from multiple sources
-      let credits = session.metadata?.credits
-      
-      // Fallback: Extract credits from payment amount (AED pricing)
-      if (!credits && session.amount_total) {
-        const amountAED = session.amount_total / 100 // Convert from fils to AED
-        const creditMapping: { [key: number]: string } = {
-          9.99: '10',
-          49.99: '50', 
-          99.99: '100',
-          499.99: '500'
-        }
-        credits = creditMapping[amountAED]
+      // Simple amount to credits mapping (AED pricing)
+      const amountAED = (session.amount_total || 0) / 100 // Convert from fils to AED
+      const creditMapping: { [key: string]: number } = {
+        '9.99': 10,
+        '49.99': 50, 
+        '99.99': 100,
+        '499.99': 500
       }
       
-      // Fallback: Extract from payment link name if available
-      if (!credits && session.payment_link) {
-        try {
-          const paymentLink = await stripe.paymentLinks.retrieve(session.payment_link as string)
-          if (paymentLink.metadata?.credits) {
-            credits = paymentLink.metadata.credits
-          }
-        } catch (error) {
-          console.log('ℹ️ Could not retrieve payment link metadata:', error)
-        }
-      }
+      const credits = creditMapping[amountAED.toString()]
 
-      console.log('💳 Processing checkout completion:', {
+      console.log('💳 Processing payment:', {
         sessionId: session.id,
         userId,
-        credits,
         customerEmail,
-        paymentStatus: session.payment_status,
-        amountTotal: session.amount_total,
-        currency: session.currency,
-        metadata: session.metadata,
-        extractionMethod: session.metadata?.credits ? 'metadata' : 
-                         session.amount_total ? 'amount' : 'unknown'
+        amountAED,
+        credits,
+        paymentStatus: session.payment_status
       })
 
       if (!credits) {
-        console.error('❌ Missing required credits data:', { 
-          credits,
-          metadata: session.metadata,
-          amountTotal: session.amount_total,
-          paymentLink: session.payment_link
-        })
+        console.error('❌ Unknown payment amount:', { amountAED })
         return NextResponse.json(
-          { error: 'Missing required credits amount' },
+          { error: `Unknown payment amount: ${amountAED} AED` },
           { status: 400 }
         )
       }
@@ -136,23 +111,20 @@ export async function POST(request: Request) {
       }
 
       const currentCredits = userData.credits || 0
-      const creditsToAdd = parseInt(credits)
+      const newTotal = currentCredits + credits
 
-      console.log('📈 Updating user credits:', {
+      console.log('📈 Adding credits:', {
         userId: userData.id,
         email: userData.email,
         currentCredits,
-        creditsToAdd,
-        newTotal: currentCredits + creditsToAdd
+        creditsToAdd: credits,
+        newTotal
       })
 
-      // Update credits in database
+      // Simple credit update
       const { data: updatedUser, error: updateError } = await supabaseAdmin
         .from('users')
-        .update({ 
-          credits: currentCredits + creditsToAdd,
-          updated_at: new Date().toISOString()
-        })
+        .update({ credits: newTotal })
         .eq('id', userData.id)
         .select()
         .single()
@@ -165,17 +137,17 @@ export async function POST(request: Request) {
         )
       }
 
-      console.log('✅ Credits updated successfully:', {
+      console.log('✅ Credits added successfully:', {
         userId: userData.id,
         email: userData.email,
         oldCredits: currentCredits,
         newCredits: updatedUser.credits,
-        creditsAdded: creditsToAdd
+        creditsAdded: credits
       })
 
       return NextResponse.json({ 
         success: true,
-        creditsAdded: creditsToAdd,
+        creditsAdded: credits,
         newTotal: updatedUser.credits
       })
     }
