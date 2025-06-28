@@ -6,6 +6,14 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2023-10-16' as any
 })
 
+// Handle both trailing slash and no trailing slash
+export async function GET(request: Request) {
+  return NextResponse.json({ 
+    status: 'Stripe webhook endpoint is ready',
+    time: new Date().toISOString()
+  })
+}
+
 export async function POST(request: Request) {
   const startTime = Date.now()
   console.log('🔔 Webhook started at:', new Date().toISOString())
