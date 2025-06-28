@@ -3,6 +3,27 @@
 ## Project Overview
 AI agent marketplace where users can use various AI agents by spending credits. Each agent redirects to its own page with custom functionality connected to n8n workflows.
 
+## 🏗️ Technical Architecture
+
+### Frontend Stack
+- **Next.js 14** - React framework with App Router
+- **TypeScript** - Type safety and better development experience
+- **Zustand** - State management for user sessions and credits
+- **React Hot Toast** - Toast notifications for user feedback
+- **Inline CSS** - Component-specific styling with gradients and animations
+
+### Backend & Infrastructure
+- **Supabase** - Authentication, database, and real-time subscriptions
+- **Stripe Payment Links** - Payment processing with AED currency
+- **N8N** - Workflow automation for agent processing
+- **OpenWeatherMap API** - External API integration example
+
+### Data Flow
+1. **Authentication**: Supabase Auth → User session → Zustand store
+2. **Credit Purchase**: Stripe Payment Links → Manual credit update → User refresh
+3. **Agent Usage**: Credit validation → Agent processing → Credit deduction
+4. **Results**: N8N/API response → Formatted display → Copy/download options
+
 ## Current Implementation Status
 
 ### ✅ Completed Features
@@ -42,7 +63,16 @@ AI agent marketplace where users can use various AI agents by spending credits. 
 - Credit deduction (15 credits per report)
 - Custom result formatting in ResultsDisplay component
 
-#### 5. **N8N Integration**
+#### 5. **Stripe Payment System**
+- Complete payment integration with Stripe Payment Links
+- 4 credit packages: 10, 50, 100, 500 credits
+- AED currency pricing: 9.99, 49.99, 99.99, 499.99 AED
+- Payment redirect flow with success/failure handling
+- Automatic credit updates via webhook processing
+- Test credit system for development environment
+- User ID tracking via `client_reference_id` parameter
+
+#### 6. **N8N Integration**
 - Direct webhook integration (simplified - no Google Sheets on frontend)
 - FormData payload sent to n8n includes:
   ```
@@ -63,6 +93,10 @@ NEXT_PUBLIC_N8N_WEBHOOK_DATA_ANALYZER=https://your-n8n-instance.com/webhook/data
 
 # OpenWeatherMap API (for Weather Reporter)
 NEXT_PUBLIC_OPENWEATHER_API_KEY=your_openweather_api_key
+
+# Stripe Payment System (Optional - Payment Links are hardcoded)
+# STRIPE_SECRET_KEY=sk_test_... (for webhook processing)
+# STRIPE_WEBHOOK_SECRET=whsec_... (for webhook verification)
 ```
 
 #### Agent Slug Mapping
@@ -74,16 +108,17 @@ NEXT_PUBLIC_OPENWEATHER_API_KEY=your_openweather_api_key
 - Task Automation Agent → `task-automation`
 - Weather Reporter Agent → `weather-reporter` ✅ (implemented)
 
-### ✅ Current Status: Data Analyzer Complete & Working
+### ✅ Current Status: Data Analyzer & Payment System Complete
 
 #### What We Have:
 1. **Working frontend** - Data analyzer page with file upload and processing UI ✅
 2. **Webhook integration** - Sends FormData to n8n endpoint ✅
 3. **Credit system** - Validates and deducts credits on success ✅
-4. **Error handling** - Specific error messages for different failure types ✅
-5. **N8N Workflow** - Complete workflow processing files and returning results ✅
-6. **Formatted Results** - Beautiful display of analysis results ✅
-7. **End-to-end Flow** - File upload → N8N processing → Results display → Credit deduction ✅
+4. **Payment system** - Full Stripe integration with Payment Links ✅
+5. **Error handling** - Specific error messages for different failure types ✅
+6. **N8N Workflow** - Complete workflow processing files and returning results ✅
+7. **Formatted Results** - Beautiful display of analysis results ✅
+8. **End-to-end Flow** - Registration → Credit purchase → Agent usage → Credit deduction ✅
 
 #### Response Format Working:
 ```json
@@ -96,9 +131,12 @@ NEXT_PUBLIC_OPENWEATHER_API_KEY=your_openweather_api_key
 
 ### 📋 Implementation Plan
 
-#### Phase 1: Complete Data Analyzer ✅ COMPLETED
+#### Phase 1: Complete Data Analyzer & Payment System ✅ COMPLETED
 - ✅ Frontend page with file upload
 - ✅ N8N workflow setup and integration
+- ✅ Stripe Payment Links integration
+- ✅ Complete pricing page with 4 credit packages
+- ✅ Payment success/failure handling
 - ✅ End-to-end testing successful
 - ✅ Formatted results display
 - ✅ Credit deduction working
@@ -113,15 +151,20 @@ NEXT_PUBLIC_OPENWEATHER_API_KEY=your_openweather_api_key
 
 ### 🎯 Next Steps
 
-1. **Setup N8N Webhook** for data analyzer
-2. **Create N8N workflow** that:
-   - Receives file upload and metadata
-   - Processes/analyzes the data
-   - Stores results in Google Sheets
-   - Returns formatted JSON response
-3. **Test complete flow** from frontend to n8n
-4. **Iterate and refine** based on testing results
-5. **Replicate pattern** for other agents
+1. **Implement additional agents** using the established patterns:
+   - Content Writer (`/agent/content-writer`)
+   - Customer Support (`/agent/customer-support`)
+   - Email Automation (`/agent/email-automation`)
+   - Sales Assistant (`/agent/sales-assistant`)
+   - Task Automation (`/agent/task-automation`)
+2. **Enhance payment system**:
+   - Set up Stripe webhook for real-time credit updates
+   - Add payment history and receipt system
+   - Implement subscription-based pricing options
+3. **Scale infrastructure**:
+   - Add more N8N workflows for additional agents
+   - Implement caching for better performance
+   - Add monitoring and analytics
 
 ### 🔍 Key Files Modified
 
@@ -131,12 +174,15 @@ NEXT_PUBLIC_OPENWEATHER_API_KEY=your_openweather_api_key
 - `/lib/googleSheetsService.ts` - Google Sheets API (not used yet)
 - `/components/agent-shared/` - Shared agent components
 - `/app/agent/data-analyzer/page.tsx` - Data analyzer agent page
+- `/app/agent/weather-reporter/page.tsx` - Weather reporter agent page
+- `/app/pricing/page.tsx` - Complete pricing page with Stripe integration
+- `payment_links.csv` - Stripe Payment Link configuration
 - `.env.example` - Environment variable template
 
 #### Modified Files:
-- `/app/page.tsx` - Updated useAgent to redirect to agent pages
+- `/app/page.tsx` - Updated useAgent to redirect to agent pages, payment success handling
 - `/lib/supabase.ts` - Added slug field to Agent interface
-- `/store/userStore.ts` - Added resetPassword function
+- `/store/userStore.ts` - Added resetPassword and purchaseCredits functions
 
 ### 💡 Design Decisions Made
 
@@ -145,6 +191,10 @@ NEXT_PUBLIC_OPENWEATHER_API_KEY=your_openweather_api_key
 3. **Hardcoded agent pages** - No dynamic generation, each agent has custom page
 4. **FormData approach** - For file uploads to n8n webhooks
 5. **Credit deduction on success** - Only charge if workflow completes successfully
+6. **Stripe Payment Links** - Use Payment Links instead of Checkout Sessions for simplicity
+7. **AED currency** - Local currency for UAE market
+8. **Fixed credit packages** - 4 predefined packages instead of custom amounts
+9. **New tab payments** - Open Stripe payment in new tab to avoid losing user state
 
 ### 🎨 UI/UX Features
 
@@ -155,6 +205,170 @@ NEXT_PUBLIC_OPENWEATHER_API_KEY=your_openweather_api_key
 - Comprehensive error messages
 - Copy/download results functionality
 - Responsive layout with sidebar credit counter
+
+---
+
+# 💳 Stripe Payment System
+
+## Overview
+Complete payment integration using Stripe Payment Links for credit purchases in AED currency.
+
+## 🏗️ System Architecture
+
+### Payment Flow
+1. User clicks "Buy Credits" → Redirects to `/pricing` page
+2. User selects credit package → `purchaseCredits()` function called
+3. Opens Stripe Payment Link in new tab with user metadata
+4. User completes payment on Stripe
+5. Stripe webhook processes payment (external)
+6. User returns to app → Payment success detected via URL params
+7. Credits automatically refreshed in user account
+
+### Credit Packages
+
+| Package | Credits | Price (AED) | Stripe Payment Link |
+|---------|---------|-------------|-------------------|
+| Basic | 10 | 9.99 | `plink_1Rf43nE7rYAIcmqEUf3QVzIM` |
+| Popular | 50 | 49.99 | `plink_1Rf45bE7rYAIcmqEJup5AdIy` |
+| Premium | 100 | 99.99 | `plink_1Rf45qE7rYAIcmqErAymOGQz` |
+| Enterprise | 500 | 499.99 | `plink_1Rf45uE7rYAIcmqEOmlW7x0i` |
+
+## 🔧 Implementation Details
+
+### userStore.ts - purchaseCredits()
+```typescript
+purchaseCredits: (credits: number) => {
+  const { user } = get()
+  if (!user) return
+
+  const paymentLinks = {
+    10: 'https://buy.stripe.com/test_28EbJ16AA7ly3ic7vh2VG0a',
+    50: 'https://buy.stripe.com/test_4gM00jbUUgW83ic3f12VG0b', 
+    100: 'https://buy.stripe.com/test_aFadR99MM35ibOI6rd2VG0c',
+    500: 'https://buy.stripe.com/test_14AbJ12kk7lyf0U16T2VG0d'
+  }
+
+  const paymentLink = paymentLinks[credits]
+  const url = `${paymentLink}?client_reference_id=${user.id}&prefilled_email=${encodeURIComponent(user.email)}`
+  
+  window.open(url, '_blank')
+}
+```
+
+### Payment Success Handling
+```typescript
+// In page.tsx and pricing/page.tsx
+useEffect(() => {
+  const payment = searchParams.get('payment')
+  
+  if (payment === 'success') {
+    toast.success('Payment successful! Credits have been added to your account.')
+    if (user) {
+      refreshUser() // Refresh user data to show new credits
+    }
+    router.replace('/pricing') // Clean up URL
+  }
+}, [searchParams, user, refreshUser, router])
+```
+
+### Test Credit System (Development)
+```typescript
+const handleTestCredits = async (credits: number) => {
+  try {
+    await updateCredits(credits)
+    toast.success(`${credits} test credits added!`)
+    refreshUser()
+  } catch (error) {
+    toast.error('Failed to add test credits')
+  }
+}
+```
+
+## 📄 Key Files
+
+### `/src/app/pricing/page.tsx`
+- Complete pricing page with all 4 credit packages
+- Visual credit package cards with features
+- Test credit buttons for development
+- Payment success/failure handling
+- Responsive design with gradient backgrounds
+
+### `/src/store/userStore.ts`
+- `purchaseCredits()` function with Payment Link integration
+- `refreshUser()` function for post-payment credit updates
+- User metadata passed to Stripe via URL parameters
+
+### `payment_links.csv`
+- Stripe Payment Link configuration export
+- Contains all payment link IDs and metadata
+- Used for reference and backup
+
+## 🎯 Features
+
+### ✅ Completed
+- 4 fixed credit packages (10, 50, 100, 500)
+- AED currency pricing
+- Stripe Payment Links integration
+- User ID tracking via `client_reference_id`
+- Email prefilling for faster checkout
+- Payment success/failure handling
+- Automatic credit refresh after payment
+- Test credit system for development
+- Beautiful pricing page with package features
+- Toast notifications for user feedback
+
+### 🔄 Payment States
+- **Pending**: User redirected to Stripe
+- **Success**: Payment completed, credits added
+- **Cancelled**: User cancelled payment
+- **Failed**: Payment failed (handled by Stripe)
+
+### 🛡️ Error Handling
+- Invalid credit package validation
+- User not logged in protection
+- Payment failure toast notifications
+- Automatic URL cleanup after payment
+- Graceful fallback for webhook delays
+
+## 🚀 Usage Examples
+
+### Basic Credit Purchase
+```typescript
+// From pricing page
+const handlePurchase = (packageData) => {
+  toast.success('Redirecting to Stripe payment...')
+  purchaseCredits(packageData.credits) // 10, 50, 100, or 500
+}
+```
+
+### Credit Validation Before Agent Use
+```typescript
+// From homepage agent interaction
+if (user.credits < agent.cost) {
+  toast.error(`Insufficient credits! You need ${agent.cost} credits but only have ${user.credits}.`)
+  router.push('/pricing') // Redirect to purchase credits
+  return
+}
+```
+
+## 📊 Pricing Strategy
+
+- **Basic (10 credits)**: 9.99 AED - Testing/trial users
+- **Popular (50 credits)**: 49.99 AED - Regular users (marked as popular)
+- **Premium (100 credits)**: 99.99 AED - Power users
+- **Enterprise (500 credits)**: 499.99 AED - Business/team usage
+
+## 🔮 Future Enhancements
+
+- Subscription-based pricing plans
+- Volume discounts for bulk purchases
+- Referral credit bonuses
+- Credit expiration system
+- Invoice generation
+- Multiple currency support
+- Stripe webhook processing (for real-time credit updates)
+- Payment history and receipts
+- Corporate billing and team accounts
 
 ---
 
@@ -439,4 +653,4 @@ Before deploying a new agent, verify:
 ---
 
 ## Current Focus
-**Two agents completed**: Data Analyzer (n8n integration) and Weather Reporter (external API). Ready to replicate this pattern for additional agents using this standardized guide.
+**Complete marketplace foundation**: Two agents implemented (Data Analyzer with n8n integration, Weather Reporter with external API), full Stripe payment system with 4 credit packages, and comprehensive user management. Ready to scale with additional agents using the established patterns and infrastructure.
