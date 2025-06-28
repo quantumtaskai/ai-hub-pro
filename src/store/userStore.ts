@@ -55,7 +55,7 @@ export const useUserStore = create<UserState>()(
               id: user.id,
               email: user.email,
               name: user.user_metadata?.name || user.email.split('@')[0],
-              credits: 1000
+              credits: 0
             }]);
           if (profileError) throw profileError;
 

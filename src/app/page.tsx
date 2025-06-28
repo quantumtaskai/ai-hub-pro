@@ -102,19 +102,10 @@ const CATEGORIES = [
   { id: 'marketing', name: 'Marketing', emoji: '📈' }
 ]
 
-// AI responses for demo
-const AI_RESPONSES = {
-  'Smart Customer Support Agent': '✅ Customer Support Complete!\n\n📞 Inquiry: Product return request\n💡 Solution: Generated return label #RT-2024-1847\n📊 Resolution time: 2.3 minutes\n😊 Customer satisfaction: 98%',
-  'Data Analysis Agent': '📊 Data Analysis Complete!\n\n📈 Key Insights:\n• Revenue increased 23% this quarter\n• Top product: Premium Widget (+45%)\n• Peak sales time: 2-4 PM daily\n• Customer retention: 87% (+12%)',
-  'Content Writing Agent': '✍️ Content Created!\n\n📄 Blog Post: "10 Productivity Hacks for Remote Teams"\n📝 Word count: 1,247 words\n🎯 SEO score: 94/100 (Excellent)\n📖 Readability: Grade A',
-  'Email Automation Agent': '📧 Email Campaign Launched!\n\n📊 Campaign Stats:\n• 5,000 emails sent successfully\n• Open rate: 32% (+8% above average)\n• Click-through rate: 12%\n• Conversions: 47 sales',
-  'Sales Assistant Agent': '💰 Sales Task Complete!\n\n🎯 Lead Qualification:\n• 23 leads processed\n• 12 qualified prospects\n• 8 meetings scheduled\n• Pipeline value: $47,500',
-  'Task Automation Agent': '⚡ Automation Complete!\n\n🔗 Workflow Created:\n• Slack → Notion → Gmail connected\n• 23 repetitive tasks eliminated\n• Time savings: 4.5 hours/week\n• Efficiency boost: +67%'
-}
 
 export default function HomePage() {
   const router = useRouter()
-  const { user, signOut, updateCredits } = useUserStore()
+  const { user, signOut } = useUserStore()
   const [agents, setAgents] = useState<Agent[]>([])
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('all')
@@ -122,20 +113,11 @@ export default function HomePage() {
   const [authMode, setAuthMode] = useState<'login' | 'register' | 'reset'>('login')
   const [isProcessing, setIsProcessing] = useState<number | null>(null)
   const [showResultModal, setShowResultModal] = useState(false)
-  const [showCreditModal, setShowCreditModal] = useState(false)
-  const [selectedCreditPack, setSelectedCreditPack] = useState<any>(null)
   const [lastResult, setLastResult] = useState('')
   const [isLoading, setIsLoading] = useState(true)
   const [showProfileModal, setShowProfileModal] = useState(false)
   const [dropdownPosition, setDropdownPosition] = useState({ top: 0, right: 0 })
 
-  // Credit packages
-  const CREDIT_PACKAGES = [
-    { id: 1, credits: 500, price: 9.99, popular: false },
-    { id: 2, credits: 1500, price: 24.99, popular: true },
-    { id: 3, credits: 3000, price: 49.99, popular: false },
-    { id: 4, credits: 7500, price: 99.99, popular: false }
-  ]
 
   // Load agents (use hardcoded agents for now)
   useEffect(() => {
@@ -173,30 +155,6 @@ export default function HomePage() {
     }
   }
 
-  // Purchase credits function (simulated for now)
-  const purchaseCredits = async (packageData: any) => {
-    if (!user) {
-      setShowAuthModal(true)
-      return
-    }
-
-    // Simulate payment processing
-    toast.loading('Processing payment...', { duration: 2000 })
-    
-    try {
-      // In production, this would integrate with Stripe
-      await new Promise(resolve => setTimeout(resolve, 2000))
-      
-      // Update credits in database
-      await updateCredits(packageData.credits)
-      
-      setShowCreditModal(false)
-      setSelectedCreditPack(null)
-      toast.success(`Successfully added ${packageData.credits.toLocaleString()} credits!`)
-    } catch (error) {
-      toast.error('Payment failed. Please try again.')
-    }
-  }
 
   const useAgent = (agent: Agent) => {
     if (!user) {
@@ -206,6 +164,7 @@ export default function HomePage() {
 
     if (user.credits < agent.cost) {
       toast.error(`Insufficient credits! You need ${agent.cost} credits but only have ${user.credits}.`)
+      router.push('/pricing')
       return
     }
 
@@ -936,151 +895,6 @@ export default function HomePage() {
         </div>
       )}
 
-      {/* Credit Purchase Modal */}
-      {showCreditModal && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: 'rgba(0, 0, 0, 0.5)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1000
-        }}>
-          <div style={{
-            background: 'white',
-            borderRadius: '20px',
-            padding: '40px',
-            width: '100%',
-            maxWidth: '500px',
-            boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
-            position: 'relative'
-          }}>
-            <button
-              onClick={() => setShowCreditModal(false)}
-              style={{
-                position: 'absolute',
-                top: '16px',
-                right: '16px',
-                background: 'none',
-                border: 'none',
-                fontSize: '24px',
-                cursor: 'pointer',
-                color: '#6b7280'
-              }}
-            >
-              ×
-            </button>
-            <h2 style={{
-              fontSize: '28px',
-              fontWeight: 'bold',
-              color: '#1f2937',
-              marginBottom: '8px',
-              textAlign: 'center'
-            }}>
-              Purchase Credits
-            </h2>
-            <p style={{
-              color: '#6b7280',
-              textAlign: 'center',
-              marginBottom: '32px'
-            }}>
-              Choose a credit package to continue using AI agents
-            </p>
-            <div style={{
-              display: 'grid',
-              gap: '16px'
-            }}>
-              {CREDIT_PACKAGES.map(pack => (
-                <div
-                  key={pack.id}
-                  onClick={() => setSelectedCreditPack(pack)}
-                  style={{
-                    border: selectedCreditPack?.id === pack.id 
-                      ? '2px solid #3b82f6' 
-                      : '2px solid #e5e7eb',
-                    borderRadius: '12px',
-                    padding: '20px',
-                    cursor: 'pointer',
-                    background: selectedCreditPack?.id === pack.id ? '#eff6ff' : 'white',
-                    transition: 'all 0.2s ease',
-                    position: 'relative'
-                  }}
-                >
-                  {pack.popular && (
-                    <div style={{
-                      position: 'absolute',
-                      top: '-8px',
-                      right: '16px',
-                      background: '#3b82f6',
-                      color: 'white',
-                      padding: '4px 12px',
-                      borderRadius: '12px',
-                      fontSize: '12px',
-                      fontWeight: '600'
-                    }}>
-                      POPULAR
-                    </div>
-                  )}
-                  <div style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center'
-                  }}>
-                    <div>
-                      <div style={{
-                        fontSize: '20px',
-                        fontWeight: 'bold',
-                        color: '#1f2937'
-                      }}>
-                        {pack.credits.toLocaleString()} Credits
-                      </div>
-                      <div style={{
-                        color: '#6b7280',
-                        fontSize: '14px'
-                      }}>
-                        ${pack.price}
-                      </div>
-                    </div>
-                    <div style={{
-                      fontSize: '24px',
-                      fontWeight: 'bold',
-                      color: '#3b82f6'
-                    }}>
-                      ${pack.price}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-            {selectedCreditPack && (
-              <button
-                onClick={() => purchaseCredits(selectedCreditPack)}
-                style={{
-                  width: '100%',
-                  background: 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)',
-                  color: 'white',
-                  padding: '16px 24px',
-                  borderRadius: '12px',
-                  fontSize: '18px',
-                  fontWeight: '600',
-                  border: 'none',
-                  cursor: 'pointer',
-                  marginTop: '24px',
-                  transition: 'transform 0.2s ease'
-                }}
-                onMouseEnter={(e) => (e.target as HTMLElement).style.transform = 'scale(1.02)'}
-                onMouseLeave={(e) => (e.target as HTMLElement).style.transform = 'scale(1)'}
-              >
-                Purchase ${selectedCreditPack.price}
-              </button>
-            )}
-          </div>
-        </div>
-      )}
 
       {/* Profile Modal */}
       {user && (
