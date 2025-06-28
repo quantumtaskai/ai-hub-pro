@@ -45,29 +45,40 @@ export async function POST(request: Request) {
       const customerEmail = session.customer_details?.email
       
       // Simple amount to credits mapping (AED pricing)
-      const amountAED = (session.amount_total || 0) / 100 // Convert from fils to AED
-      const creditMapping: { [key: string]: number } = {
-        '9.99': 10,
-        '49.99': 50, 
-        '99.99': 100,
-        '499.99': 500
-      }
+      const amountAED = Math.round((session.amount_total || 0) / 100 * 100) / 100 // Convert from fils to AED and round
       
-      const credits = creditMapping[amountAED.toString()]
+      let credits: number = 0
+      if (amountAED >= 499.99) credits = 500
+      else if (amountAED >= 99.99) credits = 100
+      else if (amountAED >= 49.99) credits = 50
+      else if (amountAED >= 9.99) credits = 10
 
       console.log('💳 Processing payment:', {
         sessionId: session.id,
         userId,
         customerEmail,
+        amountTotal: session.amount_total,
         amountAED,
         credits,
         paymentStatus: session.payment_status
       })
 
       if (!credits) {
-        console.error('❌ Unknown payment amount:', { amountAED })
+        console.error('❌ Unknown payment amount:', { 
+          amountTotal: session.amount_total,
+          amountAED,
+          expectedAmounts: [9.99, 49.99, 99.99, 499.99]
+        })
         return NextResponse.json(
-          { error: `Unknown payment amount: ${amountAED} AED` },
+          { error: `Unknown payment amount: ${amountAED} AED (from ${session.amount_total} fils)` },
+          { status: 400 }
+        )
+      }
+
+      if (!userId && !customerEmail) {
+        console.error('❌ No user identification:', { userId, customerEmail })
+        return NextResponse.json(
+          { error: 'Missing user identification' },
           { status: 400 }
         )
       }
