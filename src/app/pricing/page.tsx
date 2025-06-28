@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { toast, Toaster } from 'react-hot-toast'
 import { useUserStore } from '@/store/userStore'
 
-// Credit packages
+// Credit packages matching Stripe Payment Links configuration
 const CREDIT_PACKAGES = [
   {
     id: 1,
@@ -13,31 +13,35 @@ const CREDIT_PACKAGES = [
     price: 9.99,
     popular: false,
     description: 'Perfect for trying out our AI agents',
-    features: ['10 AI agent uses', 'Basic support', 'Valid for 30 days']
+    features: ['10 AI agent uses', 'Basic support', 'Valid for 30 days'],
+    package: 'basic'
   },
   {
     id: 2,
     credits: 50,
-    price: 24.99,
+    price: 49.99,
     popular: true,
     description: 'Great for regular users',
-    features: ['50 AI agent uses', 'Priority support', 'Valid for 60 days', 'Best value!']
+    features: ['50 AI agent uses', 'Priority support', 'Valid for 60 days', 'Best value!'],
+    package: 'popular'
   },
   {
     id: 3,
     credits: 100,
-    price: 49.99,
+    price: 99.99,
     popular: false,
     description: 'Ideal for power users',
-    features: ['100 AI agent uses', 'Premium support', 'Valid for 90 days', 'Advanced features']
+    features: ['100 AI agent uses', 'Premium support', 'Valid for 90 days', 'Advanced features'],
+    package: 'premium'
   },
   {
     id: 4,
     credits: 500,
-    price: 99.99,
+    price: 499.99,
     popular: false,
     description: 'Perfect for teams and businesses',
-    features: ['500 AI agent uses', '24/7 support', 'Valid for 6 months', 'Team collaboration']
+    features: ['500 AI agent uses', '24/7 support', 'Valid for 6 months', 'Team collaboration'],
+    package: 'enterprise'
   }
 ]
 

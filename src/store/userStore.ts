@@ -203,12 +203,12 @@ export const useUserStore = create<UserState>()(
           return
         }
 
-        // Payment Links for each credit package (will be updated with real URLs)
+        // Payment Links for each credit package
         const paymentLinks = {
-          10: 'https://buy.stripe.com/test_placeholder_10_credits',
-          50: 'https://buy.stripe.com/test_placeholder_50_credits',
-          100: 'https://buy.stripe.com/test_placeholder_100_credits',
-          500: 'https://buy.stripe.com/test_placeholder_500_credits'
+          10: 'https://buy.stripe.com/test_00w5kD6AAaxK8Cw8zl2VG08',
+          50: 'https://buy.stripe.com/test_8x2aEXf76bBOaKE9Dp2VG05',
+          100: 'https://buy.stripe.com/test_eVq14n3oo21e7ysbLx2VG06',
+          500: 'https://buy.stripe.com/test_bJe14ne327ly3ic2aX2VG07'
         }
 
         const paymentLink = paymentLinks[credits as keyof typeof paymentLinks]
