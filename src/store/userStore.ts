@@ -180,19 +180,34 @@ export const useUserStore = create<UserState>()(
 
       refreshUser: async () => {
         try {
+          console.log('🔄 Refreshing user data from database...')
           const { data: authUser } = await supabase.auth.getUser()
-          if (!authUser.user) return
+          if (!authUser.user) {
+            console.log('❌ No auth user found')
+            return
+          }
 
+          console.log('👤 Fetching user data for:', authUser.user.id)
           const { data: userData, error } = await supabase
             .from('users')
             .select('*')
             .eq('id', authUser.user.id)
             .single()
           
-          if (error) throw error
+          if (error) {
+            console.error('❌ Failed to fetch user data:', error)
+            throw error
+          }
+
+          console.log('✅ User data refreshed:', { 
+            id: userData.id, 
+            email: userData.email, 
+            credits: userData.credits 
+          })
           set({ user: userData })
         } catch (error: any) {
-          console.error('Failed to refresh user:', error)
+          console.error('❌ Failed to refresh user:', error)
+          throw error
         }
       },
 

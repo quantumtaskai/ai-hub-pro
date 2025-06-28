@@ -159,15 +159,39 @@ function PricingForm() {
             </h1>
           </div>
           
-          <div style={{
-            background: 'rgba(59, 130, 246, 0.1)',
-            border: '1px solid rgba(59, 130, 246, 0.2)',
-            borderRadius: '12px',
-            padding: '12px 20px',
-            color: '#3b82f6',
-            fontWeight: '600'
-          }}>
-            Current Balance: {user.credits} credits
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <div style={{
+              background: 'rgba(59, 130, 246, 0.1)',
+              border: '1px solid rgba(59, 130, 246, 0.2)',
+              borderRadius: '12px',
+              padding: '12px 20px',
+              color: '#3b82f6',
+              fontWeight: '600'
+            }}>
+              Current Balance: {user.credits} credits
+            </div>
+            <button
+              onClick={async () => {
+                try {
+                  await refreshUser()
+                  toast.success('Credits refreshed!')
+                } catch (error) {
+                  toast.error('Failed to refresh credits')
+                }
+              }}
+              style={{
+                background: 'rgba(16, 185, 129, 0.1)',
+                border: '1px solid rgba(16, 185, 129, 0.2)',
+                borderRadius: '8px',
+                padding: '8px 16px',
+                color: '#10b981',
+                fontSize: '14px',
+                fontWeight: '600',
+                cursor: 'pointer'
+              }}
+            >
+              🔄 Refresh
+            </button>
           </div>
         </div>
       </div>
