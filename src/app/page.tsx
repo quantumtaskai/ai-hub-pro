@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { toast, Toaster } from 'react-hot-toast'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useUserStore } from '@/store/userStore'
 import { AgentService } from '@/lib/agentService'
 import { Agent } from '@/lib/supabase'
@@ -105,7 +105,8 @@ const CATEGORIES = [
 
 export default function HomePage() {
   const router = useRouter()
-  const { user, signOut } = useUserStore()
+  const searchParams = useSearchParams()
+  const { user, signOut, refreshUser } = useUserStore()
   const [agents, setAgents] = useState<Agent[]>([])
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('all')
@@ -118,6 +119,21 @@ export default function HomePage() {
   const [showProfileModal, setShowProfileModal] = useState(false)
   const [dropdownPosition, setDropdownPosition] = useState({ top: 0, right: 0 })
 
+
+  // Handle payment success from Stripe redirect
+  useEffect(() => {
+    const payment = searchParams.get('payment')
+    const sessionId = searchParams.get('session_id')
+
+    if (payment === 'success') {
+      toast.success('Payment successful! Credits have been added to your account.')
+      if (user) {
+        refreshUser()
+      }
+      // Redirect to pricing page
+      router.replace('/pricing')
+    }
+  }, [searchParams, user, refreshUser, router])
 
   // Load agents (use hardcoded agents for now)
   useEffect(() => {

@@ -55,10 +55,11 @@ function PricingForm() {
   // Handle payment success/cancellation from URL params
   useEffect(() => {
     const success = searchParams.get('success')
+    const payment = searchParams.get('payment') // Current format from Stripe
     const cancelled = searchParams.get('cancelled')
     const sessionId = searchParams.get('session_id')
 
-    if (success === 'true') {
+    if (success === 'true' || payment === 'success') {
       toast.success('Payment successful! Credits have been added to your account.')
       // Refresh user data to show new credits
       if (user) {
