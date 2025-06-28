@@ -7,13 +7,41 @@ import { useUserStore } from '@/store/userStore'
 
 export default function TestPaymentPage() {
   const router = useRouter()
-  const { user, initializeSession } = useUserStore()
+  const { user, initializeSession, refreshUser } = useUserStore()
   const [isLoading, setIsLoading] = useState(false)
 
   // Initialize session on component mount
   useEffect(() => {
     initializeSession()
   }, [])
+
+  // Handle payment success/cancel from URL params
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search)
+    const success = urlParams.get('success')
+    const cancelled = urlParams.get('cancelled')
+    const sessionId = urlParams.get('session_id')
+
+    if (success === 'true') {
+      toast.success('🎉 Payment successful! Webhook should have processed the credit update.')
+      // Refresh user data after a delay to show updated credits
+      setTimeout(async () => {
+        try {
+          await refreshUser()
+          toast.success('Credits refreshed!')
+        } catch (error) {
+          console.log('Failed to refresh credits after payment')
+        }
+      }, 3000)
+      
+      // Clean up URL
+      window.history.replaceState({}, document.title, '/test-payment')
+    } else if (cancelled === 'true') {
+      toast.error('Payment was cancelled.')
+      // Clean up URL
+      window.history.replaceState({}, document.title, '/test-payment')
+    }
+  }, [refreshUser])
 
   // Redirect to login if not authenticated
   useEffect(() => {
@@ -227,6 +255,40 @@ export default function TestPaymentPage() {
               }}>
                 https://buy.stripe.com/test_5kQ4gz2kkbBO4mgbLx2VG09
               </code>
+            </div>
+
+            <div style={{ 
+              marginTop: '12px',
+              padding: '12px',
+              background: '#fef3c7',
+              borderRadius: '8px',
+              border: '1px solid #f59e0b'
+            }}>
+              <strong style={{ color: '#92400e' }}>🔧 Configure Redirect URLs in Stripe:</strong>
+              <br />
+              <div style={{ marginTop: '8px', fontSize: '12px' }}>
+                <strong>Success URL:</strong>
+                <br />
+                <code style={{ 
+                  background: '#fff',
+                  padding: '2px 6px',
+                  borderRadius: '4px',
+                  color: '#1f2937'
+                }}>
+                  https://ai-hub-pro.vercel.app/test-payment?success=true
+                </code>
+                <br /><br />
+                <strong>Cancel URL:</strong>
+                <br />
+                <code style={{ 
+                  background: '#fff',
+                  padding: '2px 6px',
+                  borderRadius: '4px',
+                  color: '#1f2937'
+                }}>
+                  https://ai-hub-pro.vercel.app/test-payment?cancelled=true
+                </code>
+              </div>
             </div>
           </div>
         </div>
