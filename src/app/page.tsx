@@ -299,21 +299,6 @@ function HomePageContent() {
               >
                 Pricing
               </span>
-              
-              <span 
-                onClick={() => router.push('/test-payment')}
-                style={{ 
-                  color: '#10b981', 
-                  fontWeight: '500', 
-                  cursor: 'pointer',
-                  transition: 'color 0.2s ease',
-                  fontSize: '14px'
-                }}
-                onMouseEnter={(e) => (e.target as HTMLElement).style.color = '#059669'}
-                onMouseLeave={(e) => (e.target as HTMLElement).style.color = '#10b981'}
-              >
-                🧪 Test Payment
-              </span>
             </div>
           </div>
           
