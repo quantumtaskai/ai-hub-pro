@@ -204,4 +204,4 @@ npm run build        # Build for production
 npm run start        # Start production server
 npm run lint         # Run ESLint
 
-# Useful during development
+# Useful during development# Force deployment
