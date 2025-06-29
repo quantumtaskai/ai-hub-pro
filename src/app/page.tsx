@@ -458,9 +458,8 @@ function HomePageContent() {
         </div>
       </nav>
 
-      {/* Hero Section - Only show for non-logged-in users */}
-      {!user && (
-        <section style={{ position: 'relative', padding: '64px 24px', overflow: 'hidden' }}>
+      {/* Hero Section */}
+      <section style={{ position: 'relative', padding: '32px 24px 64px', overflow: 'hidden' }}>
         <div style={{ maxWidth: '1280px', margin: '0 auto', textAlign: 'center', position: 'relative' }}>
           {/* Floating Elements */}
           <div style={{
@@ -488,174 +487,104 @@ function HomePageContent() {
             position: 'absolute',
             bottom: '80px',
             left: '33%',
-            width: '56px',
-            height: '56px',
-            background: 'rgba(16, 185, 129, 0.3)',
+            width: '48px',
+            height: '48px',
+            background: 'rgba(236, 72, 153, 0.3)',
             borderRadius: '50%',
             animation: 'float 6s ease-in-out infinite',
             animationDelay: '4s'
           }}></div>
 
           <h1 style={{
-            fontSize: 'clamp(2.5rem, 5vw, 4rem)',
+            fontSize: 'clamp(48px, 8vw, 96px)',
             fontWeight: 'bold',
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            marginBottom: '24px',
-            lineHeight: '1.2'
+            marginBottom: '32px',
+            lineHeight: '1.1'
           }}>
-            AI Agents Marketplace
-          </h1>
-          
-          <p style={{
-            fontSize: 'clamp(1.1rem, 2vw, 1.25rem)',
-            color: '#6b7280',
-            maxWidth: '600px',
-            margin: '0 auto 48px',
-            lineHeight: '1.6'
-          }}>
-            Discover, deploy, and scale AI agents designed to automate your business processes. 
-            From customer service to data analysis, find the perfect AI solution.
-          </p>
-
-          <div style={{
-            display: 'flex',
-            gap: '16px',
-            justifyContent: 'center',
-            flexWrap: 'wrap'
-          }}>
-            <button
-              onClick={() => { setAuthMode('register'); setShowAuthModal(true) }}
-              style={{
-                background: 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)',
-                color: 'white',
-                padding: '16px 32px',
-                borderRadius: '9999px',
-                fontSize: '18px',
-                fontWeight: '600',
-                border: 'none',
-                cursor: 'pointer',
-                boxShadow: '0 10px 25px rgba(59, 130, 246, 0.3)',
-                transition: 'transform 0.2s ease'
-              }}
-              onMouseEnter={(e) => (e.target as HTMLElement).style.transform = 'scale(1.05)'}
-              onMouseLeave={(e) => (e.target as HTMLElement).style.transform = 'scale(1)'}
-            >
-              Get Started Free
-            </button>
-            <button
-              style={{
-                background: 'transparent',
-                color: '#6b7280',
-                padding: '16px 32px',
-                borderRadius: '9999px',
-                fontSize: '18px',
-                fontWeight: '500',
-                border: '2px solid #e5e7eb',
-                cursor: 'pointer',
-                transition: 'all 0.2s ease'
-              }}
-              onMouseEnter={(e) => {
-                (e.target as HTMLElement).style.borderColor = '#3b82f6'
-                ;(e.target as HTMLElement).style.color = '#3b82f6'
-              }}
-              onMouseLeave={(e) => {
-                (e.target as HTMLElement).style.borderColor = '#e5e7eb'
-                ;(e.target as HTMLElement).style.color = '#6b7280'
-              }}
-            >
-              Learn More
-            </button>
-          </div>
-        </div>
-      </section>
-      )}
-
-      {/* Search and Filter Section */}
-      <section style={{ padding: user ? '48px 24px 48px' : '0 24px 48px' }}>
-        <div style={{ maxWidth: '1280px', margin: '0 auto' }}>
-          <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '24px',
-            marginBottom: '48px'
-          }}>
-            {/* Search Bar */}
-            <div style={{
-              position: 'relative',
-              maxWidth: '600px',
-              margin: '0 auto'
+            <span style={{
+              background: 'linear-gradient(135deg, #8b5cf6 0%, #3b82f6 50%, #6366f1 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent'
             }}>
+              AI Agents
+            </span>
+            <br />
+            <span style={{ color: '#1f2937' }}>Ready to Use</span>
+          </h1>
+
+          {/* Search */}
+          <div style={{ maxWidth: '512px', margin: '0 auto 64px auto' }}>
+            <div style={{ position: 'relative' }}>
               <input
                 type="text"
-                placeholder="Search for AI agents..."
+                placeholder="Search AI agents..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 style={{
                   width: '100%',
-                  padding: '16px 20px 16px 48px',
-                  border: '2px solid #e5e7eb',
-                  borderRadius: '16px',
-                  fontSize: '16px',
-                  background: 'white',
-                  boxShadow: '0 4px 6px rgba(0, 0, 0, 0.05)'
+                  padding: '20px 32px',
+                  borderRadius: '24px',
+                  fontSize: '18px',
+                  border: 'none',
+                  outline: 'none',
+                  backdropFilter: 'blur(20px)',
+                  background: 'rgba(255, 255, 255, 0.8)',
+                  boxShadow: '0 20px 40px rgba(0, 0, 0, 0.1)',
+                  color: '#000000'
                 }}
               />
-              <span style={{
+              <svg style={{
                 position: 'absolute',
-                left: '16px',
+                right: '24px',
                 top: '50%',
                 transform: 'translateY(-50%)',
-                fontSize: '20px'
-              }}>
-                🔍
-              </span>
-            </div>
-
-            {/* Category Filters */}
-            <div style={{
-              display: 'flex',
-              gap: '12px',
-              justifyContent: 'center',
-              flexWrap: 'wrap'
-            }}>
-              {CATEGORIES.map(category => (
-                <button
-                  key={category.id}
-                  onClick={() => setSelectedCategory(category.id)}
-                  style={{
-                    background: selectedCategory === category.id 
-                      ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
-                      : 'white',
-                    color: selectedCategory === category.id ? 'white' : '#6b7280',
-                    padding: '12px 20px',
-                    borderRadius: '9999px',
-                    border: selectedCategory === category.id ? 'none' : '2px solid #e5e7eb',
-                    cursor: 'pointer',
-                    fontWeight: '500',
-                    transition: 'all 0.2s ease',
-                    boxShadow: selectedCategory === category.id 
-                      ? '0 4px 12px rgba(102, 126, 234, 0.3)'
-                      : '0 2px 4px rgba(0, 0, 0, 0.05)'
-                  }}
-                  onMouseEnter={(e) => {
-                    if (selectedCategory !== category.id) {
-                      (e.target as HTMLElement).style.transform = 'scale(1.05)'
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (selectedCategory !== category.id) {
-                      (e.target as HTMLElement).style.transform = 'scale(1)'
-                    }
-                  }}
-                >
-                  <span style={{ marginRight: '8px' }}>{category.emoji}</span>
-                  {category.name}
-                </button>
-              ))}
+                width: '24px',
+                height: '24px',
+                color: '#9ca3af'
+              }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+              </svg>
             </div>
           </div>
+
+          {/* Category Filters */}
+          <div style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            justifyContent: 'center',
+            gap: '16px',
+            marginBottom: '64px'
+          }}>
+            {CATEGORIES.map(category => (
+              <button
+                key={category.id}
+                onClick={() => setSelectedCategory(category.id)}
+                style={{
+                  padding: '12px 24px',
+                  borderRadius: '16px',
+                  fontWeight: '600',
+                  border: 'none',
+                  cursor: 'pointer',
+                  backdropFilter: 'blur(10px)',
+                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+                  transition: 'all 0.3s ease',
+                  background: selectedCategory === category.id
+                    ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+                    : 'rgba(255, 255, 255, 0.7)',
+                  color: selectedCategory === category.id ? 'white' : '#374151'
+                }}
+              >
+                <span style={{ marginRight: '8px' }}>{category.emoji}</span>
+                {category.name}
+              </button>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Agents Grid Section */}
+      <section style={{ padding: '0 24px 48px' }}>
+        <div style={{ maxWidth: '1280px', margin: '0 auto' }}>
 
           {/* Agents Grid */}
           {isLoading ? (
@@ -675,35 +604,33 @@ function HomePageContent() {
           ) : (
             <div style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(360px, 1fr))',
-              gap: '24px'
+              gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))',
+              gap: '32px'
             }}>
               {filteredAgents.map(agent => (
                 <div
                   key={agent.id}
                   title=""
                   style={{
-                    background: 'rgba(255, 255, 255, 0.8)',
-                    borderRadius: '20px',
+                    borderRadius: '24px',
                     padding: '32px',
+                    backdropFilter: 'blur(30px)',
+                    background: 'linear-gradient(145deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.7))',
                     border: '1px solid rgba(255, 255, 255, 0.3)',
-                    backdropFilter: 'blur(20px)',
-                    transition: 'all 0.3s ease',
+                    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+                    transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
                     cursor: 'pointer',
-                    position: 'relative',
-                    overflow: 'hidden',
-                    minHeight: '300px',
-                    maxHeight: '300px',
                     display: 'flex',
-                    flexDirection: 'column'
+                    flexDirection: 'column',
+                    minHeight: '300px'
                   }}
                   onMouseEnter={(e) => {
-                    (e.target as HTMLElement).style.transform = 'translateY(-8px)'
-                    ;(e.target as HTMLElement).style.boxShadow = '0 20px 40px rgba(0, 0, 0, 0.1)'
+                    e.currentTarget.style.transform = 'translateY(-16px) scale(1.02)'
+                    e.currentTarget.style.boxShadow = '0 40px 80px rgba(0, 0, 0, 0.12)'
                   }}
                   onMouseLeave={(e) => {
-                    (e.target as HTMLElement).style.transform = 'translateY(0)'
-                    ;(e.target as HTMLElement).style.boxShadow = 'none'
+                    e.currentTarget.style.transform = 'translateY(0) scale(1)'
+                    e.currentTarget.style.boxShadow = '0 8px 32px rgba(0, 0, 0, 0.1)'
                   }}
                 >
                   {/* Agent Header */}
@@ -770,11 +697,10 @@ function HomePageContent() {
                       flex: 1,
                       wordWrap: 'break-word',
                       overflow: 'hidden',
-                      textOverflow: 'clip',
+                      textOverflow: 'ellipsis',
                       display: '-webkit-box',
                       WebkitLineClamp: 3,
-                      WebkitBoxOrient: 'vertical',
-                      maxHeight: '63px'
+                      WebkitBoxOrient: 'vertical'
                     }}>
                     {agent.description}
                   </p>
@@ -783,8 +709,7 @@ function HomePageContent() {
                   <div style={{
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: 'space-between',
-                    marginTop: 'auto'
+                    justifyContent: 'space-between'
                   }}>
                     <div style={{
                       display: 'flex',
@@ -932,12 +857,140 @@ function HomePageContent() {
         />
       )}
 
+      {/* Footer */}
+      <footer style={{
+        padding: '48px 24px',
+        background: '#1f2937'
+      }}>
+        <div style={{ maxWidth: '1280px', margin: '0 auto' }}>
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+            gap: '32px',
+            marginBottom: '32px'
+          }}>
+            <div>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                marginBottom: '16px'
+              }}>
+                <img 
+                  src="/logo-white.png" 
+                  alt="Quantum Task AI Logo"
+                  style={{
+                    height: '60px',
+                    width: 'auto'
+                  }}
+                  onError={(e) => {
+                    // Fallback if white logo image doesn't exist
+                    e.target.style.display = 'none'
+                    e.target.nextSibling.style.display = 'flex'
+                  }}
+                />
+                <div style={{
+                  display: 'none', // Hidden by default, shows if logo fails to load
+                  alignItems: 'center',
+                  gap: '12px'
+                }}>
+                  <div style={{
+                    width: '40px',
+                    height: '40px',
+                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    borderRadius: '8px'
+                  }}></div>
+                  <span style={{
+                    fontSize: '20px',
+                    fontWeight: 'bold',
+                    color: 'white'
+                  }}>
+                    Quantum Task AI
+                  </span>
+                </div>
+              </div>
+              <p style={{ color: '#9ca3af' }}>
+                The future of AI automation is here. Build, deploy, and scale AI agents for your business.
+              </p>
+            </div>
+            
+            <div>
+              <h4 style={{
+                fontWeight: '600',
+                color: 'white',
+                marginBottom: '16px'
+              }}>
+                Product
+              </h4>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <a href="#" style={{ color: '#9ca3af', textDecoration: 'none' }}>Agents</a>
+                <a href="#" style={{ color: '#9ca3af', textDecoration: 'none' }}>Marketplace</a>
+                <a href="#" style={{ color: '#9ca3af', textDecoration: 'none' }}>Integrations</a>
+                <a href="#" style={{ color: '#9ca3af', textDecoration: 'none' }}>API</a>
+              </div>
+            </div>
+            
+            <div>
+              <h4 style={{
+                fontWeight: '600',
+                color: 'white',
+                marginBottom: '16px'
+              }}>
+                Company
+              </h4>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <a href="#" style={{ color: '#9ca3af', textDecoration: 'none' }}>About</a>
+                <a href="#" style={{ color: '#9ca3af', textDecoration: 'none' }}>Blog</a>
+                <a href="#" style={{ color: '#9ca3af', textDecoration: 'none' }}>Careers</a>
+                <a href="#" style={{ color: '#9ca3af', textDecoration: 'none' }}>Contact</a>
+              </div>
+            </div>
+            
+            <div>
+              <h4 style={{
+                fontWeight: '600',
+                color: 'white',
+                marginBottom: '16px'
+              }}>
+                Support
+              </h4>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <a href="#" style={{ color: '#9ca3af', textDecoration: 'none' }}>Documentation</a>
+                <a href="#" style={{ color: '#9ca3af', textDecoration: 'none' }}>Help Center</a>
+                <a href="#" style={{ color: '#9ca3af', textDecoration: 'none' }}>Community</a>
+                <a href="#" style={{ color: '#9ca3af', textDecoration: 'none' }}>Status</a>
+              </div>
+            </div>
+          </div>
+          
+          <div style={{
+            borderTop: '1px solid #374151',
+            paddingTop: '32px',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '16px',
+            justifyContent: 'space-between',
+            alignItems: 'center'
+          }}>
+            <p style={{ color: '#9ca3af' }}>© 2025 Quantum Task AI. All rights reserved.</p>
+            <div style={{ display: 'flex', gap: '24px' }}>
+              <a href="#" style={{ color: '#9ca3af', textDecoration: 'none' }}>Privacy</a>
+              <a href="#" style={{ color: '#9ca3af', textDecoration: 'none' }}>Terms</a>
+              <a href="#" style={{ color: '#9ca3af', textDecoration: 'none' }}>Security</a>
+            </div>
+          </div>
+        </div>
+      </footer>
 
       {/* CSS Animations */}
       <style jsx>{`
         @keyframes float {
-          0%, 100% { transform: translateY(0px); }
-          50% { transform: translateY(-20px); }
+          0%, 100% { 
+            transform: translateY(0px) rotate(0deg); 
+          }
+          50% { 
+            transform: translateY(-30px) rotate(10deg); 
+          }
         }
         @keyframes pulse {
           0%, 100% { 
