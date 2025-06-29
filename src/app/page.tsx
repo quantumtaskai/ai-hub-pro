@@ -192,7 +192,11 @@ function HomePageContent() {
   return (
     <div style={{
       minHeight: '100vh',
-      background: 'linear-gradient(135deg, #f6f8ff 0%, #e8f0fe 50%, #f0f7ff 100%)'
+      background: 'linear-gradient(135deg, #f6f8ff 0%, #e8f0fe 50%, #f0f7ff 100%)',
+      margin: 0,
+      padding: 0,
+      width: '100%',
+      overflowX: 'hidden'
     }}>
       <Toaster position="top-right" />
       
@@ -860,7 +864,9 @@ function HomePageContent() {
       {/* Footer */}
       <footer style={{
         padding: '48px 24px',
-        background: '#1f2937'
+        background: '#1f2937',
+        margin: 0,
+        width: '100%'
       }}>
         <div style={{ maxWidth: '1280px', margin: '0 auto' }}>
           <div style={{
@@ -983,7 +989,18 @@ function HomePageContent() {
       </footer>
 
       {/* CSS Animations */}
-      <style jsx>{`
+      <style jsx global>{`
+        * {
+          box-sizing: border-box;
+        }
+        
+        html, body {
+          margin: 0;
+          padding: 0;
+          overflow-x: hidden;
+          width: 100%;
+        }
+        
         @keyframes float {
           0%, 100% { 
             transform: translateY(0px) rotate(0deg); 
